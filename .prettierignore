@@ -1,0 +1,15 @@
+# Ignore artifacts:
+build
+coverage
+.next/
+node_modules/
+out/
+
+# Ignore lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore misc
+.DS_Store
+*.pem
