@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useFormStatus } from 'react-dom';
+import { Suspense } from 'react';
 import { login } from './actions';
 
 function SubmitButton() {
@@ -19,10 +20,20 @@ function SubmitButton() {
   );
 }
 
-export default function LoginPage() {
+function ErrorMessage() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
+  if (!error) return null;
+
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+      <div className="text-sm text-red-800">{error}</div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -39,11 +50,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <div className="text-sm text-red-800">{error}</div>
-          </div>
-        )}
+        <Suspense fallback={null}>
+          <ErrorMessage />
+        </Suspense>
 
         <form action={login} className="mt-8 space-y-6">
           <div className="space-y-4">
