@@ -1,5 +1,7 @@
 # Phase 2: User Authentication & Profile Foundation
 
+> **Note**: Follow [code_guidelines.md](./code_guidelines.md) for all implementation work.
+
 This phase focuses on implementing user authentication using Supabase Auth, creating basic user profile pages, defining the necessary database tables, and setting up security rules.
 
 ## Tickets
@@ -14,7 +16,10 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
   - [x] Create UI pages/components for `/login` and `/signup`. (UI implementation complete)
   - [x] Set up user session management. (Core logic with `@supabase/ssr` and cookie handling in place)
   - [x] Install and configure `@supabase/ssr` for streamlined session management and server-side rendering with Next.js and Supabase. (Configuration complete)
-  - [ ] Protect routes/pages that require authentication (e.g., a future dashboard page). (Pending full auth flow testing)
+  - [x] Protect routes/pages that require authentication (e.g., a future dashboard page). (Implementation complete)
+  - [x] Refactor auth code into feature slice (`src/features/auth/`) following code guidelines structure. (Verified complete)
+  - [x] Create barrel exports for auth components (`src/features/auth/components/index.ts`). (Verified complete)
+  - [x] Define global `UserProfile` type in `src/types/` for consistent typing across auth and profile features. (Verified complete)
 - **Status**: In Progress
 - **Acceptance Criteria**:
   - Users can successfully sign up for a new account.
