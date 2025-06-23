@@ -33,30 +33,33 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
   - Authenticated users can access protected routes, while unauthenticated users are redirected or denied access.
   - User sessions are persisted and managed correctly across browser sessions.
 
-### 2.2 User Table in Supabase
+### 2.2 Database Schema for User Profiles
 
-- **Description**: Define and create the `users` table in the Supabase database.
+- **Description**: Create a `public.profiles` table to store user profile data, linked to Supabase's built-in `auth.users` table.
 - **Tasks**:
-  - [x] Define schema for `users` table including fields like:
+  - [x] Define schema for `public.profiles` table including fields like:
     - `id` (UUID, primary key, references `auth.users.id`)
     - `username` (TEXT, unique, indexed)
-    - `email` (TEXT, unique, from `auth.users.email`)
     - `created_at` (TIMESTAMPTZ, default `now()`)
     - `display_name` (TEXT, nullable)
-    - `short_bio` (TEXT, nullable)
-    - `profile_picture_url` (TEXT, nullable, references Supabase Storage)
-    - `page_theme_preference` (TEXT, nullable, e.g., 'light', 'dark', 'system')
-  - [x] Create the `users` table in Supabase via SQL or the Supabase dashboard.
+    - `bio` (TEXT, nullable)
+    - `avatar_url` (TEXT, nullable, references Supabase Storage)
+  - [x] Create the `public.profiles` table in Supabase via SQL.
   - [x] Ensure `username` is unique and has appropriate constraints.
+  - [x] Set up Row Level Security (RLS) policies for the `profiles` table.
 - **Status**: Done
 - **Acceptance Criteria**:
-  - The `users` table is created in the Supabase database with the specified schema.
+  - The `public.profiles` table is created in the Supabase database with the specified schema.
   - The `id` field correctly references `auth.users.id` and is set as the primary key.
   - The `username` field has a unique constraint and is indexed for efficient lookups.
-  - The `email` field has a unique constraint and is populated from `auth.users.email`.
   - The `created_at` field defaults to the current timestamp upon record creation.
-  - All specified fields (`display_name`, `short_bio`, `profile_picture_url`, `page_theme_preference`) exist with correct types and nullability.
-  - A database trigger or function is implemented to automatically create a corresponding record in the `users` table when a new user signs up in `auth.users`.
+  - All specified fields (`display_name`, `bio`, `avatar_url`) exist with correct types and nullability.
+  - RLS is enabled with appropriate policies for public read access and authenticated user write access.
+- **Notes**:
+  - Supabase's built-in `auth.users` table handles authentication data (email, password, etc.)
+  - Our custom `public.profiles` table stores public profile information
+  - The two tables are linked via the `id` field (foreign key relationship)
+  - Email is accessible via `auth.users` and doesn't need to be duplicated in `profiles`
 
 ### 2.3 Username Constraints & Validation
 
@@ -79,14 +82,14 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 - **Description**: Implement a dynamic public profile page for users.
 - **Tasks**:
   - [x] Create dynamic route `app/[username]/page.tsx`.
-  - [x] Fetch basic user information from the `users` table based on the `username` parameter.
+  - [x] Fetch basic user information from the `profiles` table based on the `username` parameter.
   - [x] Display fetched user information (e.g., display name, bio).
   - [x] Include an initial placeholder for future content blocks.
 - **Status**: Done
 - **Acceptance Criteria**:
   - A dynamic route `app/[username]/page.tsx` is created and functional.
   - Navigating to `/[username]` (e.g., `/johndoe`) successfully renders the profile page for the specified user.
-  - The page fetches and displays public user information (e.g., `username`, `display_name`, `short_bio`, `profile_picture_url`) from the `users` table.
+  - The page fetches and displays public user information (e.g., `username`, `display_name`, `bio`, `avatar_url`) from the `profiles` table.
   - If the `username` does not exist, an appropriate "User not found" page or message is displayed.
   - The profile page includes a clearly marked placeholder area for future content blocks or sections.
   - The page is server-rendered or statically generated with ISR for good performance and SEO, if applicable.
@@ -95,18 +98,18 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 
 - **Description**: Enable and configure Row Level Security for relevant Supabase tables.
 - **Tasks**:
-  - [ ] Enable RLS on the `users` table.
-  - [ ] Create RLS policies for the `users` table:
+  - [ ] Enable RLS on the `profiles` table.
+  - [ ] Create RLS policies for the `profiles` table:
     - Allow users to read their own profile data.
     - Allow users to update their own profile data.
-    - Allow public read access to selected fields for display on profile pages (e.g., `display_name`, `short_bio`, `profile_picture_url`).
+    - Allow public read access to selected fields for display on profile pages (e.g., `display_name`, `bio`, `avatar_url`).
   - [ ] Plan for RLS on future tables like `blocks` and `posts` (e.g., owners can read/write, public can read published content).
 - **Status**: To Do
 - **Acceptance Criteria**:
-  - Row Level Security (RLS) is enabled on the `users` table in Supabase.
-  - Authenticated users can read all fields of their own record in the `users` table.
-  - Authenticated users can update permissible fields (e.g., `display_name`, `short_bio`, `profile_picture_url`, `page_theme_preference`) of their own record in the `users` table.
-  - All users (including unauthenticated ones) can publicly read selected, non-sensitive fields (e.g., `username`, `display_name`, `short_bio`, `profile_picture_url`) from the `users` table for profile display purposes.
+  - Row Level Security (RLS) is enabled on the `profiles` table in Supabase.
+  - Authenticated users can read all fields of their own record in the `profiles` table.
+  - Authenticated users can update permissible fields (e.g., `display_name`, `bio`, `avatar_url`) of their own record in the `profiles` table.
+  - All users (including unauthenticated ones) can publicly read selected, non-sensitive fields (e.g., `username`, `display_name`, `bio`, `avatar_url`) from the `profiles` table for profile display purposes.
   - Users cannot read or modify data for which they do not have explicit RLS policy permission.
   - RLS policies are clearly defined and testable.
   - Initial considerations for RLS on future related tables (e.g., `blocks`, `posts`) are documented.
