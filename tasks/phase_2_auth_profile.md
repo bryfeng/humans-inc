@@ -20,7 +20,7 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
   - [x] Refactor auth code into feature slice (`src/features/auth/`) following code guidelines structure. (Verified complete)
   - [x] Create barrel exports for auth components (`src/features/auth/components/index.ts`). (Verified complete)
   - [x] Define global `UserProfile` type in `src/types/` for consistent typing across auth and profile features. (Verified complete)
-- **Status**: In Progress
+- **Status**: Done
 - **Acceptance Criteria**:
   - Users can successfully sign up for a new account.
   - Users receive a confirmation email (if email confirmation is enabled).
@@ -37,7 +37,7 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 
 - **Description**: Define and create the `users` table in the Supabase database.
 - **Tasks**:
-  - [ ] Define schema for `users` table including fields like:
+  - [x] Define schema for `users` table including fields like:
     - `id` (UUID, primary key, references `auth.users.id`)
     - `username` (TEXT, unique, indexed)
     - `email` (TEXT, unique, from `auth.users.email`)
@@ -46,9 +46,9 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
     - `short_bio` (TEXT, nullable)
     - `profile_picture_url` (TEXT, nullable, references Supabase Storage)
     - `page_theme_preference` (TEXT, nullable, e.g., 'light', 'dark', 'system')
-  - [ ] Create the `users` table in Supabase via SQL or the Supabase dashboard.
-  - [ ] Ensure `username` is unique and has appropriate constraints.
-- **Status**: To Do
+  - [x] Create the `users` table in Supabase via SQL or the Supabase dashboard.
+  - [x] Ensure `username` is unique and has appropriate constraints.
+- **Status**: Done
 - **Acceptance Criteria**:
   - The `users` table is created in the Supabase database with the specified schema.
   - The `id` field correctly references `auth.users.id` and is set as the primary key.
@@ -62,10 +62,10 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 
 - **Description**: Implement constraints and validation for usernames.
 - **Tasks**:
-  - [ ] Restrict `username` to a specific pattern (e.g., `[a-z0-9_-]{3,}`).
-  - [ ] Implement logic to reserve system routes/keywords (e.g., `login`, `signup`, `api`, `admin`) from being used as usernames.
-  - [ ] Add validation for username format and availability during sign-up or profile updates.
-- **Status**: To Do
+  - [x] Restrict `username` to a specific pattern (e.g., `[a-z0-9_-]{3,}`).
+  - [x] Implement logic to reserve system routes/keywords (e.g., `login`, `signup`, `api`, `admin`) from being used as usernames.
+  - [x] Add validation for username format and availability during sign-up or profile updates.
+- **Status**: Done
 - **Acceptance Criteria**:
   - Usernames are restricted to the defined pattern (e.g., `[a-z0-9_-]{3,}`).
   - System-reserved keywords/routes (e.g., `login`, `signup`, `api`, `admin`, `profile`, `settings`) cannot be used as usernames.
@@ -78,11 +78,11 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 
 - **Description**: Implement a dynamic public profile page for users.
 - **Tasks**:
-  - [ ] Create dynamic route `app/[username]/page.tsx`.
-  - [ ] Fetch basic user information from the `users` table based on the `username` parameter.
-  - [ ] Display fetched user information (e.g., display name, bio).
-  - [ ] Include an initial placeholder for future content blocks.
-- **Status**: To Do
+  - [x] Create dynamic route `app/[username]/page.tsx`.
+  - [x] Fetch basic user information from the `users` table based on the `username` parameter.
+  - [x] Display fetched user information (e.g., display name, bio).
+  - [x] Include an initial placeholder for future content blocks.
+- **Status**: Done
 - **Acceptance Criteria**:
   - A dynamic route `app/[username]/page.tsx` is created and functional.
   - Navigating to `/[username]` (e.g., `/johndoe`) successfully renders the profile page for the specified user.
