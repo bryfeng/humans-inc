@@ -20,8 +20,9 @@ export async function uploadAvatar(
   }
 
   const fileExtension = file.name.split('.').pop();
-  const fileName = `${userId}.${fileExtension}`; // e.g., user123.png
-  const filePath = `public/${fileName}`; // Store in a 'public' folder within the 'avatars' bucket for easier public URL generation
+  const fileName = `avatar-${Date.now()}.${fileExtension}`;
+  // This path creates a folder with the user's ID, which matches the RLS policy.
+  const filePath = `${userId}/${fileName}`;
 
   const { data, error } = await supabase.storage
     .from('avatars') // Target the 'avatars' bucket
@@ -39,12 +40,10 @@ export async function uploadAvatar(
     throw new Error('Upload successful, but no path returned from Supabase.');
   }
 
-  // Construct the public URL
-  // Note: This assumes your 'avatars' bucket is configured for public access
-  // and the files are in a 'public' subfolder within the bucket.
+  // Get public URL from the correct path
   const { data: publicUrlData } = supabase.storage
     .from('avatars')
-    .getPublicUrl(filePath);
+    .getPublicUrl(data.path);
 
   if (!publicUrlData || !publicUrlData.publicUrl) {
     throw new Error('Could not retrieve public URL for the uploaded avatar.');
@@ -56,22 +55,13 @@ export async function uploadAvatar(
 /**
  * Deletes an avatar from the 'avatars' Supabase storage bucket.
  *
- * @param userId The ID of the user whose avatar needs to be deleted.
- * @param fileExtension The extension of the avatar file (e.g., 'png', 'jpg').
- * @returns True if deletion was successful or file didn't exist, false otherwise.
+ * @param filePath The full path of the file to delete (e.g., "userId/avatar-123.png").
+ * @throws If the deletion fails.
  */
-export async function deleteAvatar(
-  userId: string,
-  fileExtension: string
-): Promise<boolean> {
-  if (!userId || !fileExtension) {
-    throw new Error(
-      'User ID and file extension are required to delete an avatar.'
-    );
+export async function deleteAvatar(filePath: string): Promise<void> {
+  if (!filePath) {
+    throw new Error('File path is required to delete an avatar.');
   }
-
-  const fileName = `${userId}.${fileExtension}`;
-  const filePath = `public/${fileName}`;
 
   const { error } = await supabase.storage.from('avatars').remove([filePath]);
 
@@ -79,8 +69,6 @@ export async function deleteAvatar(
     // It's often okay if the file wasn't found (e.g., user never had an avatar)
     // You might want to log this or handle specific error codes differently
     console.warn(`Could not delete avatar ${filePath}: ${error.message}`);
-    return false;
+    throw new Error(`Failed to delete avatar: ${error.message}`);
   }
-
-  return true;
 }

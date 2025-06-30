@@ -1,7 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
 import {
   updateProfile,
   type ProfileFormState,
@@ -34,7 +34,7 @@ function SubmitButton({
 }
 
 export function ProfileForm({ profile }: { profile: UserProfile | null }) {
-  const [state, formAction] = useFormState(updateProfile, initialState);
+  const [state, formAction] = useActionState(updateProfile, initialState);
   const [username, setUsername] = useState(profile?.username ?? '');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

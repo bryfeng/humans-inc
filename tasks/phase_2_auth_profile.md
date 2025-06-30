@@ -98,13 +98,13 @@ This phase focuses on implementing user authentication using Supabase Auth, crea
 
 - **Description**: Enable and configure Row Level Security for relevant Supabase tables.
 - **Tasks**:
-  - [ ] Enable RLS on the `profiles` table.
-  - [ ] Create RLS policies for the `profiles` table:
+  - [x] Enable RLS on the `profiles` table.
+  - [x] Create RLS policies for the `profiles` table:
     - Allow users to read their own profile data.
     - Allow users to update their own profile data.
     - Allow public read access to selected fields for display on profile pages (e.g., `display_name`, `bio`, `avatar_url`).
-  - [ ] Plan for RLS on future tables like `blocks` and `posts` (e.g., owners can read/write, public can read published content).
-- **Status**: To Do
+  - [x] Plan for RLS on future tables like `blocks` and `posts` (e.g., owners can read/write, public can read published content).
+- **Status**: Done
 - **Acceptance Criteria**:
   - Row Level Security (RLS) is enabled on the `profiles` table in Supabase.
   - Authenticated users can read all fields of their own record in the `profiles` table.

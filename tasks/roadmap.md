@@ -19,48 +19,48 @@ Long-Term Vision: While V1 is a practical tool, every feature is designed with t
 
 ### Phase 0: Project Hygiene & Tooling
 
-- [ ] **Core Repo Tooling**
-  - [ ] Add `.env.example` and document required environment variables.
-  - [ ] Configure Prettier and ESLint with strict TypeScript rules.
-  - [ ] Set up Husky + lint-staged pre-commit hooks.
-  - [ ] Add GitHub Actions workflow for lint, type-check, and tests.
+- [x] **Core Repo Tooling**
+  - [x] Add `.env.example` and document required environment variables.
+  - [x] Configure Prettier and ESLint with strict TypeScript rules.
+  - [x] Set up Husky + lint-staged pre-commit hooks.
+  - [x] Add GitHub Actions workflow for lint, type-check, and tests.
 
 ### Phase 1: Project Setup & Core Structure
 
-- [ ] **Initialize Next.js Project**
-  - [ DONE ] Use `npx create-next-app@latest humans-inc --typescript --tailwind --eslint`.
-  - [ ] Set up basic project structure: `components/`, `app/` (for routing), `lib/` or `utils/`, `styles/`.
-- [ ] **Integrate Supabase**
-  - [ ] Set up a new Supabase project.
-  - [ ] Install Supabase client library (`supabase-js`).
-  - [ ] Create Supabase client instance and manage environment variables for Supabase URL and anon key.
-  - [ ] Configure Supabase Storage bucket (`avatars`) with public-read policy and helper upload util.
-- [ ] **Basic Layout & Theme**
-  - [ ] Create a main layout component (`app/layout.tsx`).
-  - [ ] Implement a simple header and footer (e.g., "Powered by humans.inc" in footer).
-  - [ ] Set up global styles in `app/globals.css`.
-  - [ ] Implement Light/Dark mode toggle functionality (e.g., using `next-themes`) and store user preference.
+- [x] **Initialize Next.js Project**
+  - [x] Use `npx create-next-app@latest humans-inc --typescript --tailwind --eslint`.
+  - [x] Set up basic project structure: `components/`, `app/` (for routing), `lib/` or `utils/`, `styles/`.
+- [x] **Integrate Supabase**
+  - [x] Set up a new Supabase project.
+  - [x] Install Supabase client library (`supabase-js`).
+  - [x] Create Supabase client instance and manage environment variables for Supabase URL and anon key.
+  - [x] Configure Supabase Storage bucket (`avatars`) with public-read policy and helper upload util.
+- [x] **Basic Layout & Theme**
+  - [x] Create a main layout component (`app/layout.tsx`).
+  - [x] Implement a simple header and footer (e.g., "Powered by humans.inc" in footer).
+  - [x] Set up global styles in `app/globals.css`.
+  - [x] Implement Light/Dark mode toggle functionality (e.g., using `next-themes`) and store user preference.
 
 ### Phase 2: User Authentication & Profile Foundation
 
-- [ ] **User Authentication with Supabase Auth**
-  - [ ] Implement sign-up, login, and logout functionality.
-  - [ ] Create pages for `/login`, `/signup`.
-  - [ ] Protect routes/pages requiring authentication.
-  - [ ] Set up user sessions.
-  - [ ] Install and configure `@supabase/auth-helpers-nextjs` for session management.
-- [ ] **Basic User Profile Page (`app/[username]/page.tsx`)**
-  - [ ] Implement dynamic route for user profiles.
-  - [ ] Fetch and display basic user information.
-  - [ ] Initial placeholder for content blocks.
-- [ ] **User Table in Supabase**
-  - [ ] Define `users` table (e.g., `id`, `username`, `email`, `created_at`, `display_name`, `short_bio`, `profile_picture_url`, `page_theme_preference`).
-  - [ ] Ensure `username` is unique.
-- [ ] **Username Constraints**
-  - [ ] Restrict `username` to pattern `[a-z0-9_-]{3,}` and reserve system routes (e.g., `login`, `signup`).
-- [ ] **Supabase Row Level Security (RLS)**
-  - [ ] Enable RLS on `users`, `blocks`, and `posts` tables.
-  - [ ] Add policies to allow owners read/write and public read for published content.
+- [x] **User Authentication with Supabase Auth**
+  - [x] Implement sign-up, login, and logout functionality.
+  - [x] Create pages for `/login`, `/signup`.
+  - [x] Protect routes/pages requiring authentication.
+  - [x] Set up user sessions.
+  - [x] Install and configure `@supabase/ssr` for session management.
+- [x] **Basic User Profile Page (`app/[username]/page.tsx`)**
+  - [x] Implement dynamic route for user profiles.
+  - [x] Fetch and display basic user information.
+  - [x] Initial placeholder for content blocks.
+- [x] **Profiles Table in Supabase**
+  - [x] Define `profiles` table linked to `auth.users`.
+  - [x] Ensure `username` is unique.
+- [x] **Username Constraints**
+  - [x] Restrict `username` to pattern `[a-z0-9_-]{3,}` and reserve system routes.
+- [x] **Supabase Row Level Security (RLS)**
+  - [x] Enable RLS on `profiles` table.
+  - [x] Add policies to allow owners read/write and public read.
 
 ### Phase 3: Core "Block" Components - Creator View (Editing Functionality)
 
