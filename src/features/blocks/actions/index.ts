@@ -215,3 +215,91 @@ export async function getUserBlocks(userId: string) {
 
   return blocks || [];
 }
+
+// Optimized version for use in authenticated dashboard contexts
+// Skips redundant auth check since the caller has already authenticated
+export async function getUserBlocksOptimized(userId: string) {
+  const supabase = await createClient();
+
+  // Use select() to only fetch the fields we need for editing
+  const { data: blocks, error } = await supabase
+    .from('blocks')
+    .select(
+      'id, user_id, position, block_type, title, content, config, created_at, updated_at'
+    )
+    .eq('user_id', userId)
+    .order('position', { ascending: true });
+
+  if (error) {
+    console.error('Fetch user blocks error:', error.message);
+    throw new Error(`Failed to fetch blocks: ${error.message}`);
+  }
+
+  return blocks || [];
+}
+
+// Combined function to get profile + blocks in a single query where possible
+export async function getProfileWithBlocks(userId: string) {
+  const supabase = await createClient();
+
+  // Execute both queries in parallel
+  const [profileResult, blocksResult] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).single(),
+    supabase
+      .from('blocks')
+      .select(
+        'id, user_id, position, block_type, title, content, config, created_at, updated_at'
+      )
+      .eq('user_id', userId)
+      .order('position', { ascending: true }),
+  ]);
+
+  const profile = profileResult.data || null;
+  const blocks = blocksResult.data || [];
+
+  if (profileResult.error && profileResult.error.code !== 'PGRST116') {
+    console.error('Fetch profile error:', profileResult.error.message);
+  }
+
+  if (blocksResult.error) {
+    console.error('Fetch blocks error:', blocksResult.error.message);
+  }
+
+  return { profile, blocks };
+}
+
+// Public function to fetch blocks for visitor view
+export async function getPublicUserBlocks(userId: string) {
+  const supabase = await createClient();
+
+  const { data: blocks, error } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('user_id', userId)
+    .order('position', { ascending: true });
+
+  if (error) {
+    console.error('Fetch public blocks error:', error.message);
+    return [];
+  }
+
+  return blocks || [];
+}
+
+// Public function to get user profile by username
+export async function getPublicProfile(username: string) {
+  const supabase = await createClient();
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('username', username)
+    .single();
+
+  if (error) {
+    console.error('Fetch public profile error:', error.message);
+    return null;
+  }
+
+  return profile;
+}

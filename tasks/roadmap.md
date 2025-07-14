@@ -80,28 +80,31 @@ Long-Term Vision: While V1 is a practical tool, every feature is designed with t
   - [x] Text Block editor for simple content with markdown support.
   - [x] Links Block editor for curated list of external links.
   - [x] Content List Block editor for curated items with annotations.
-- [ ] **Individual Post/Article Creation & Management** *(Deferred to Phase 4)*
+- [ ] **Individual Post/Article Creation & Management** _(Deferred to Phase 4)_
   - [ ] Define `posts` table (e.g., `id`, `user_id` (FK), `title`, `slug`, `excerpt`, `reading_time`, `content` (rich text JSON), `created_at`, `updated_at`, `is_published`).
   - [ ] Add unique constraint on (`user_id`, `slug`) and index on `created_at`.
   - [ ] Dedicated page/modal for writing/editing posts (e.g., `app/dashboard/posts/new`).
   - [ ] Integrate TipTap rich text editor.
   - [ ] Save post content to the `posts` table.
 
-### Phase 4: Visitor View - Displaying User Pages
+### Phase 4: Visitor View - Displaying User Pages ✅
 
-- [ ] **Bio Block - Visitor View**
-  - [ ] Component to display formatted bio content.
-- [ ] **Curated Content Block - Visitor View**
-  - [ ] Component to display curated items (embedded videos, links, annotations).
-- [ ] **Writings List Block - Visitor View**
-  - [ ] Component to display a list/grid of user's published posts.
-- [ ] **Individual Post Page - Visitor View (`app/[username]/[postSlug]/page.tsx`)**
-  - [ ] Dynamic route to display a single published post.
-  - [ ] Render rich text content.
-- [ ] **Assembling the Public User Page (`app/[username]/page.tsx`)**
-  - [ ] Fetch user's ordered blocks from Supabase.
-  - [ ] Dynamically render visitor view components for each block.
-  - [ ] Handle cases for missing profiles or no blocks.
+- [x] **Bio Block - Visitor View**
+  - [x] Component to display formatted bio content.
+- [x] **Text Block - Visitor View**
+  - [x] Component to display text content with markdown support.
+- [x] **Links Block - Visitor View**
+  - [x] Component to display curated links in organized format.
+- [x] **Content List Block - Visitor View**
+  - [x] Component to display curated items with type indicators and annotations.
+- [x] **Block Renderer Component**
+  - [x] Unified component to render any block type with error handling.
+- [x] **Assembling the Public User Page (`app/[username]/page.tsx`)**
+  - [x] Fetch user's ordered blocks from Supabase.
+  - [x] Dynamically render visitor view components for each block.
+  - [x] Handle cases for missing profiles or no blocks.
+  - [x] Add SEO metadata and Open Graph support.
+  - [x] Implement responsive design and accessibility.
 
 ### Phase 5: Refinements & Polish
 

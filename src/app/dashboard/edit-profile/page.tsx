@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { getUserBlocks } from '@/features/blocks/actions';
+import { getProfileWithBlocks } from '@/features/blocks/actions';
 import { BlockList, BlockCreator } from '@/features/blocks/components';
 import { logout } from '@/features/auth/lib/actions';
-import type { Block } from '@/features/blocks/types';
 
 export default async function EditProfilePage() {
   const supabase = await createClient();
@@ -16,25 +15,12 @@ export default async function EditProfilePage() {
     redirect('/login');
   }
 
-  // Fetch user's profile data
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  // Fetch profile and blocks in parallel (optimized)
+  const { profile, blocks } = await getProfileWithBlocks(user.id);
 
   // If no profile exists or missing username, redirect to main dashboard for setup
-  if (profileError || !profile || !profile.username) {
+  if (!profile || !profile.username) {
     redirect('/dashboard?setup=required');
-  }
-
-  // Fetch user's blocks
-  let blocks: Block[] = [];
-  try {
-    blocks = await getUserBlocks(user.id);
-  } catch (error) {
-    console.error('Error fetching blocks:', error);
-    // Continue with empty blocks array
   }
 
   return (
