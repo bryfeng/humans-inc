@@ -64,26 +64,23 @@ Long-Term Vision: While V1 is a practical tool, every feature is designed with t
 
 ### Phase 3: Core "Block" Components - Creator View (Editing Functionality)
 
-- [ ] **"Block" Data Model in Supabase**
-  - [ ] Define `blocks` table (e.g., `id`, `user_id` (FK), `type` (enum: 'bio', 'curated_content', 'writings_list'), `content` (JSONB), `config` (JSONB), `position` (numeric)).
-  - [ ] Create composite index on (`user_id`, `position`) for efficient ordering queries.
-- [ ] **Creator Dashboard Page (e.g., `app/dashboard/edit-profile/page.tsx`)**
-  - [ ] Protected route for logged-in users to manage their profile blocks.
-- [ ] **Drag-and-Drop Interface for Blocks**
-  - [ ] Use a library like `dnd-kit` or `React Beautiful DnD`.
-  - [ ] Allow creators to add, remove, and reorder blocks.
-  - [ ] Update `position` and block data in Supabase.
-- [ ] **Bio Block - Creator View**
-  - [ ] Component for editing bio content (display name, tagline, profile picture upload, key links).
-  - [ ] Saves data to the 'bio' type block in Supabase.
-- [ ] **Curated Content Block - Creator View**
-  - [ ] Component to add/edit/remove curated items (YouTube videos, external articles).
-  - [ ] Store URL, type, user's annotation.
-  - [ ] (Optional V1.1) Auto-fetch metadata on URL paste.
-  - [ ] Saves data to the 'curated_content' type block.
-- [ ] **Writings Block (List Display) - Creator View**
-  - [ ] Placeholder or configuration settings for how writings are displayed on the public page. Actual writing occurs separately.
-- [ ] **Individual Post/Article Creation & Management**
+- [x] **"Block" Data Model in Supabase**
+  - [x] Define `blocks` table with flexible JSONB content and config fields.
+  - [x] Create composite index on (`user_id`, `position`) for efficient ordering queries.
+- [x] **Creator Dashboard Page (`app/dashboard/edit-profile/page.tsx`)**
+  - [x] Protected route for logged-in users to manage their profile blocks.
+- [x] **Drag-and-Drop Interface for Blocks**
+  - [x] Use `@dnd-kit` library for drag-and-drop functionality.
+  - [x] Allow creators to add, remove, and reorder blocks.
+  - [x] Update `position` and block data in Supabase.
+- [x] **Bio Block - Creator View**
+  - [x] Component for editing bio content (display name, tagline, profile picture upload, key links).
+  - [x] Saves data to the 'bio' type block in Supabase.
+- [x] **Additional Block Types - Creator View**
+  - [x] Text Block editor for simple content with markdown support.
+  - [x] Links Block editor for curated list of external links.
+  - [x] Content List Block editor for curated items with annotations.
+- [ ] **Individual Post/Article Creation & Management** *(Deferred to Phase 4)*
   - [ ] Define `posts` table (e.g., `id`, `user_id` (FK), `title`, `slug`, `excerpt`, `reading_time`, `content` (rich text JSON), `created_at`, `updated_at`, `is_published`).
   - [ ] Add unique constraint on (`user_id`, `slug`) and index on `created_at`.
   - [ ] Dedicated page/modal for writing/editing posts (e.g., `app/dashboard/posts/new`).

@@ -1,4 +1,4 @@
-import { logout } from '@/features/auth/lib/actions';
+import { logout } from '@/lib/auth-actions';
 import { ProfileForm } from '@/features/profile/components/ProfileForm';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';

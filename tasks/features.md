@@ -1,0 +1,3 @@
+- content blocks can make it hidden
+- login should go straight to dashboard
+- editors as their own components

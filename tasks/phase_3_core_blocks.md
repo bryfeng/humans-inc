@@ -10,15 +10,13 @@ This phase focuses on building the core components for the creator's editing exp
 
 - **Description**: Define the database schema for the `blocks` table, which will store the content and configuration for each block on a user's page. Uses a flexible, Notion-like approach where blocks can contain various types of content without rigid categorization.
 
-- **Design Philosophy**:
-
+- **Design Philosophy**: 
   - Flexible content storage using JSONB for maximum adaptability
   - Text-based `block_type` instead of rigid enums to allow future expansion
   - Support for user-curated content like writings, recommendations, affiliate items, galleries, etc.
   - Block positioning system for drag-and-drop reordering
 
 - **Schema**:
-
   ```sql
   CREATE TABLE public.blocks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -38,13 +36,11 @@ This phase focuses on building the core components for the creator's editing exp
   ```
 
 - **Content Examples**:
-
   - **Bio Block**: `{"display_name": "Jane Doe", "tagline": "Writer & Thinker", "bio": "...", "avatar_url": "...", "links": [{"label": "Twitter", "url": "..."}]}`
   - **Curated Content**: `{"items": [{"title": "Amazing Article", "url": "...", "annotation": "This changed my perspective...", "type": "article"}]}`
   - **Simple Text**: `{"text": "Here's my latest thinking on...", "formatting": "markdown"}`
 
 - **Tasks**:
-
   - [x] Create the `blocks` table in Supabase with the flexible schema above.
   - [x] Create composite index on (`user_id`, `position`) for efficient ordering queries.
   - [x] Create index on (`user_id`, `created_at DESC`) for chronological queries.
@@ -67,7 +63,6 @@ This phase focuses on building the core components for the creator's editing exp
 - **Description**: Create a protected dashboard page where logged-in users can manage the blocks on their profile. Uses Next.js 15 App Router patterns and follows existing feature-based architecture.
 
 - **Tasks**:
-
   - [x] Create blocks feature domain structure (`/src/features/blocks/`).
   - [x] Create TypeScript types for blocks (`/src/features/blocks/types/`).
   - [x] Implement server actions for block CRUD operations.
@@ -77,10 +72,10 @@ This phase focuses on building the core components for the creator's editing exp
   - [x] Build `BlockEditor` component for editing individual blocks.
   - [x] Build `BlockCreator` component for adding new blocks.
   - [x] Build `BlockItem` component for individual block display/interaction.
-  - [ ] Integrate block management UI into dashboard route.
-  - [ ] Test authentication protection and block CRUD flows.
+  - [x] Integrate block management UI into dashboard route.
+  - [x] Test authentication protection and block CRUD flows.
 
-- **Status**: To Do
+- **Status**: Done
 
 - **Acceptance Criteria**:
   - Only authenticated users can access the dashboard page.
@@ -97,12 +92,42 @@ This phase focuses on building the core components for the creator's editing exp
 
 - **Description**: Build the component that allows a creator to edit the content of their Bio block.
 - **Tasks**:
-  - [ ] Create a form or inline-editing component for the Bio block's content (display name, tagline, profile picture, key links).
-  - [ ] Implement profile picture upload functionality using Supabase Storage.
-  - [ ] Ensure that changes are saved to the corresponding 'bio' type block in the `blocks` table.
-- **Status**: To Do
+  - [x] Create a form or inline-editing component for the Bio block's content (display name, tagline, profile picture, key links).
+  - [x] Implement profile picture upload functionality using Supabase Storage.
+  - [x] Ensure that changes are saved to the corresponding 'bio' type block in the `blocks` table.
+- **Status**: Done
 - **Acceptance Criteria**:
-  - The creator can edit their display name and tagline.
-  - The creator can upload or change their profile picture.
-  - The creator can add, edit, and remove key personal links.
-  - All edits are correctly saved to the `content` or `config` JSONB field of the appropriate block in the database.
+  - [x] The creator can edit their display name and tagline.
+  - [x] The creator can upload or change their profile picture.
+  - [x] The creator can add, edit, and remove key personal links.
+  - [x] All edits are correctly saved to the `content` or `config` JSONB field of the appropriate block in the database.
+
+### 3.4 Additional Block Types - Creator View
+
+- **Description**: Implement creator editing interfaces for additional block types beyond the bio block.
+- **Tasks**:
+  - [x] Create Text Block editor for simple text content with optional markdown formatting.
+  - [x] Create Links Block editor for curated list of external links.
+  - [x] Create Content List Block editor for curated content with annotations.
+  - [x] Integrate all block type editors into the main BlockEditor component.
+- **Status**: Done
+- **Acceptance Criteria**:
+  - [x] Creators can edit text blocks with plain text or markdown formatting.
+  - [x] Creators can add/edit/remove items in links blocks.
+  - [x] Creators can add/edit/remove curated content items with annotations and types.
+  - [x] All block editors are accessible through the unified BlockEditor interface.
+
+## Phase 3 Summary
+
+**Status**: ✅ **COMPLETED**
+
+All major components for the creator editing experience have been implemented:
+
+- ✅ Flexible block data model with JSONB content storage
+- ✅ Complete dashboard with drag-and-drop block management  
+- ✅ Comprehensive block editor supporting multiple block types
+- ✅ Bio block editor with profile picture upload
+- ✅ Text, Links, and Content List block editors
+- ✅ Server actions for all CRUD operations
+- ✅ Authentication protection and user ownership validation
+- ✅ Row Level Security policies

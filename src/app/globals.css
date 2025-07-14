@@ -1,26 +1,44 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-background: oklch(100% 0 0);
-  --color-foreground: oklch(9% 0 0);
+  /* Sophisticated light mode - warm, professional */
+  --color-background: oklch(99% 0.005 85);
+  --color-foreground: oklch(15% 0.01 20);
+  --color-muted: oklch(96% 0.01 85);
+  --color-accent: oklch(25% 0.02 25);
+  --color-primary: oklch(35% 0.15 270);
+  --color-secondary: oklch(85% 0.02 80);
 
-  --color-background-dark: oklch(4% 0 0);
-  --color-foreground-dark: oklch(93% 0 0);
+  /* Rich dark mode - deep, elegant */
+  --color-background-dark: oklch(8% 0.01 20);
+  --color-foreground-dark: oklch(92% 0.01 85);
+  --color-muted-dark: oklch(12% 0.01 20);
+  --color-accent-dark: oklch(88% 0.01 85);
+  --color-primary-dark: oklch(75% 0.15 270);
+  --color-secondary-dark: oklch(20% 0.02 25);
 }
 
 @layer base {
   :root {
     --background: var(--color-background);
     --foreground: var(--color-foreground);
+    --muted: var(--color-muted);
+    --accent: var(--color-accent);
+    --primary: var(--color-primary);
+    --secondary: var(--color-secondary);
   }
 
   .dark {
     --background: var(--color-background-dark);
     --foreground: var(--color-foreground-dark);
+    --muted: var(--color-muted-dark);
+    --accent: var(--color-accent-dark);
+    --primary: var(--color-primary-dark);
+    --secondary: var(--color-secondary-dark);
   }
 
   * {
-    border-color: hsl(var(--foreground) / 0.15);
+    border-color: hsl(var(--foreground) / 0.08);
   }
 
   body {
@@ -28,6 +46,53 @@
     color: var(--foreground);
     font-feature-settings:
       'rlig' 1,
-      'calt' 1;
+      'calt' 1,
+      'kern' 1,
+      'liga' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
+    line-height: 1.6;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: var(--primary);
+    color: var(--background);
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 }
