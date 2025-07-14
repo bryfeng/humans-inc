@@ -42,13 +42,13 @@ export function BlockEditor({ block, onSave, onCancel }: BlockEditorProps) {
   const renderContentEditor = () => {
     switch (block.block_type) {
       case 'bio':
-        return <BioEditor content={content} onChange={setContent} />;
+        return <BioEditor content={content as BioBlockContent} onChange={setContent} />;
       case 'text':
-        return <TextEditor content={content} onChange={setContent} />;
+        return <TextEditor content={content as TextBlockContent} onChange={setContent} />;
       case 'links':
-        return <LinksEditor content={content} onChange={setContent} />;
+        return <LinksEditor content={content as LinksBlockContent} onChange={setContent} />;
       case 'content_list':
-        return <ContentListEditor content={content} onChange={setContent} />;
+        return <ContentListEditor content={content as ContentListBlockContent} onChange={setContent} />;
       default:
         return (
           <div className="text-foreground/60 text-sm">
@@ -129,7 +129,7 @@ function TextEditor({
         <select
           value={textContent.formatting || 'plain'}
           onChange={(e) =>
-            onChange({ ...textContent, formatting: e.target.value })
+            onChange({ ...textContent, formatting: e.target.value as 'plain' | 'markdown' })
           }
           className="border-foreground/20 bg-background focus:border-foreground/40 rounded-md border px-3 py-2 text-sm focus:outline-none"
         >

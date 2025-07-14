@@ -4,22 +4,11 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { uploadAvatar } from '../../../../lib/supabase/storage';
 import { createClient } from '@/lib/supabase/client';
-import type { Block } from '../types';
-
-interface BioContent {
-  display_name?: string;
-  tagline?: string;
-  bio?: string;
-  avatar_url?: string;
-  links?: Array<{
-    label: string;
-    url: string;
-  }>;
-}
+import type { Block, BioBlockContent } from '../types';
 
 interface BioEditorProps {
-  content: BioContent;
-  onChange: (content: BioContent) => void;
+  content: BioBlockContent;
+  onChange: (content: BioBlockContent) => void;
 }
 
 export function BioEditor({ content, onChange }: BioEditorProps) {

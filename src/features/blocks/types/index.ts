@@ -21,7 +21,7 @@ export type BlockType =
   | 'gallery';
 
 // Content interfaces for different block types
-export interface BioBlockContent {
+export interface BioBlockContent extends Record<string, unknown> {
   display_name?: string;
   tagline?: string;
   bio?: string;
@@ -32,12 +32,12 @@ export interface BioBlockContent {
   }>;
 }
 
-export interface TextBlockContent {
+export interface TextBlockContent extends Record<string, unknown> {
   text: string;
   formatting?: 'plain' | 'markdown';
 }
 
-export interface LinksBlockContent {
+export interface LinksBlockContent extends Record<string, unknown> {
   items: Array<{
     title: string;
     url: string;
@@ -45,7 +45,7 @@ export interface LinksBlockContent {
   }>;
 }
 
-export interface ContentListBlockContent {
+export interface ContentListBlockContent extends Record<string, unknown> {
   items: Array<{
     title: string;
     url?: string;
@@ -55,7 +55,7 @@ export interface ContentListBlockContent {
 }
 
 // Block configuration options
-export interface BlockConfig {
+export interface BlockConfig extends Record<string, unknown> {
   size?: 'small' | 'medium' | 'large';
   layout?: 'default' | 'centered' | 'grid';
   styling?: {
