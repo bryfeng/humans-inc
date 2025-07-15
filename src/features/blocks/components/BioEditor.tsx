@@ -95,41 +95,48 @@ export function BioEditor({ content, onChange }: BioEditorProps) {
   return (
     <div className="space-y-6">
       {/* Profile Picture */}
-      <div>
-        <label className="mb-2 block text-sm font-medium">
+      <div className="animate-slide-up">
+        <label className="text-foreground/80 mb-2 block text-sm font-medium">
           Profile Picture
         </label>
         <div className="flex items-center gap-4">
           {content.avatar_url && (
-            <Image
-              src={content.avatar_url}
-              alt="Profile"
-              width={64}
-              height={64}
-              className="border-foreground/20 h-16 w-16 rounded-full border-2 object-cover"
-            />
+            <div className="animate-scale-in">
+              <Image
+                src={content.avatar_url}
+                alt="Profile"
+                width={64}
+                height={64}
+                className="border-foreground/20 h-16 w-16 rounded-full border-2 object-cover transition-all duration-200 hover:scale-105"
+              />
+            </div>
           )}
-          <div>
+          <div className="flex-1">
             <input
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
               disabled={isUploading}
-              className="file:bg-foreground file:text-background text-sm file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:px-4 file:py-2 file:text-sm file:font-medium hover:file:opacity-90"
+              className="file:btn-primary text-sm file:mr-4 file:cursor-pointer file:border-0 file:text-sm file:font-medium disabled:file:opacity-50"
             />
             <p className="text-foreground/60 mt-1 text-xs">
               Upload an image (max 5MB)
             </p>
             {isUploading && (
-              <p className="text-foreground/80 mt-1 text-xs">Uploading...</p>
+              <div className="text-foreground/80 mt-2 flex items-center gap-2 text-xs">
+                <div className="border-foreground/30 border-t-foreground h-3 w-3 animate-spin rounded-full border-2"></div>
+                Uploading...
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {/* Display Name */}
-      <div>
-        <label className="mb-2 block text-sm font-medium">Display Name</label>
+      <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <label className="text-foreground/80 mb-2 block text-sm font-medium">
+          Display Name
+        </label>
         <input
           type="text"
           value={content.display_name || ''}
@@ -137,32 +144,39 @@ export function BioEditor({ content, onChange }: BioEditorProps) {
             onChange({ ...content, display_name: e.target.value })
           }
           placeholder="Your name or brand"
-          className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+          className="input-primary"
         />
       </div>
 
       {/* Tagline */}
-      <div>
-        <label className="mb-2 block text-sm font-medium">Tagline</label>
+      <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <label className="text-foreground/80 mb-2 block text-sm font-medium">
+          Tagline
+        </label>
         <input
           type="text"
           value={content.tagline || ''}
           onChange={(e) => onChange({ ...content, tagline: e.target.value })}
           placeholder="A short description of what you do"
-          className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+          className="input-primary"
         />
       </div>
 
       {/* Bio */}
-      <div>
-        <label className="mb-2 block text-sm font-medium">Bio</label>
+      <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <label className="text-foreground/80 mb-2 block text-sm font-medium">
+          Bio
+        </label>
         <textarea
           value={content.bio || ''}
           onChange={(e) => onChange({ ...content, bio: e.target.value })}
           placeholder="Tell people about yourself..."
           rows={4}
-          className="border-foreground/20 bg-background focus:border-foreground/40 w-full resize-y rounded-md border px-3 py-2 text-sm focus:outline-none"
+          className="input-primary resize-y"
         />
+        <p className="text-foreground/60 mt-1 text-xs">
+          {content.bio?.length || 0} characters
+        </p>
       </div>
 
       {/* Links */}

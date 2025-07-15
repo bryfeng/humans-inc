@@ -3,6 +3,12 @@ import { redirect } from 'next/navigation';
 import { getProfileWithBlocks } from '@/features/blocks/actions';
 import { BlockList, BlockCreator } from '@/features/blocks/components';
 import { logout } from '@/features/auth/lib/actions';
+import { cache } from 'react';
+
+// Cache the profile with blocks fetch to improve performance
+const getCachedProfileWithBlocks = cache(async (userId: string) => {
+  return await getProfileWithBlocks(userId);
+});
 
 export default async function EditProfilePage() {
   const supabase = await createClient();
@@ -15,8 +21,8 @@ export default async function EditProfilePage() {
     redirect('/login');
   }
 
-  // Fetch profile and blocks in parallel (optimized)
-  const { profile, blocks } = await getProfileWithBlocks(user.id);
+  // Fetch profile and blocks with caching
+  const { profile, blocks } = await getCachedProfileWithBlocks(user.id);
 
   // If no profile exists or missing username, redirect to main dashboard for setup
   if (!profile || !profile.username) {

@@ -2,63 +2,71 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { createClient } from '@/lib/supabase/server';
 import { logout } from '@/lib/auth-actions';
+import { cache } from 'react';
+
+// Cache the profile fetch to avoid multiple database calls
+const getCachedProfile = cache(async (userId: string) => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('profiles')
+    .select('username, display_name')
+    .eq('id', userId)
+    .single();
+  return data;
+});
 
 const Header = async () => {
   const supabase = await createClient();
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get profile data if user is logged in
+  // Get profile data if user is logged in - use cached version
   let profile = null;
   if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('username, display_name')
-      .eq('id', user.id)
-      .single();
-    profile = data;
+    profile = await getCachedProfile(user.id);
   }
 
-  const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0];
+  const displayName =
+    profile?.display_name || profile?.username || user?.email?.split('@')[0];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-foreground/5 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <header className="border-foreground/5 bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-xl">
+      <nav className="container mx-auto flex items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="text-2xl font-bold text-foreground hover:text-primary transition-colors duration-200 tracking-tight"
+          className="text-foreground hover:text-primary text-2xl font-bold tracking-tight transition-colors duration-200"
         >
           humans.inc
         </Link>
-        
+
         <div className="flex items-center space-x-6">
           {user ? (
             // Logged in state - more sophisticated design
-            <div className="hidden sm:flex items-center space-x-6">
+            <div className="hidden items-center space-x-6 sm:flex">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <span className="text-xs font-medium text-primary uppercase">
+                <div className="bg-primary/10 border-primary/20 flex h-8 w-8 items-center justify-center rounded-full border">
+                  <span className="text-primary text-xs font-medium uppercase">
                     {displayName?.charAt(0) || 'U'}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-accent">
+                <span className="text-accent text-sm font-medium">
                   {displayName}
                 </span>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200 px-3 py-1.5 rounded-lg hover:bg-muted/50"
+                  className="text-foreground/70 hover:text-foreground hover:bg-muted/50 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200"
                 >
                   Dashboard
                 </Link>
                 <form action={logout} className="inline">
                   <button
                     type="submit"
-                    className="text-sm font-medium text-foreground/60 hover:text-foreground/80 transition-colors duration-200 px-3 py-1.5 rounded-lg hover:bg-muted/30"
+                    className="text-foreground/60 hover:text-foreground/80 hover:bg-muted/30 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200"
                   >
                     Sign Out
                   </button>
@@ -67,32 +75,32 @@ const Header = async () => {
             </div>
           ) : (
             // Logged out state - elegant and inviting
-            <div className="hidden sm:flex items-center space-x-4">
+            <div className="hidden items-center space-x-4 sm:flex">
               <Link
                 href="/login"
-                className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-muted/40"
+                className="text-foreground/70 hover:text-foreground hover:bg-muted/40 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="text-sm font-semibold bg-primary text-background hover:bg-primary/90 px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-primary text-background hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
               >
                 Get Started
               </Link>
             </div>
           )}
-          
+
           <div className="flex items-center">
             <ThemeToggle />
           </div>
         </div>
 
         {/* Mobile menu button - we'll enhance this later */}
-        <div className="sm:hidden flex items-center space-x-2">
+        <div className="flex items-center space-x-2 sm:hidden">
           {user && (
-            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <span className="text-xs font-medium text-primary uppercase">
+            <div className="bg-primary/10 border-primary/20 flex h-7 w-7 items-center justify-center rounded-full border">
+              <span className="text-primary text-xs font-medium uppercase">
                 {displayName?.charAt(0) || 'U'}
               </span>
             </div>
