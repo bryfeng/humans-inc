@@ -1,17 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { useTheme } from 'next-themes';
 
-// Simple icons for demonstration - you might want to use an icon library
+// Beautiful icons with smooth animations
 const SunIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    fill="currentColor"
-    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-4 w-4 transition-transform duration-300 ease-in-out group-hover:rotate-12"
   >
-    <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+    <circle cx="12" cy="12" r="5" />
+    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
   </svg>
 );
 
@@ -19,46 +23,59 @@ const MoonIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    fill="currentColor"
-    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-4 w-4 transition-transform duration-300 ease-in-out group-hover:-rotate-12"
   >
-    <path
-      fillRule="evenodd"
-      d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.981A10.503 10.503 0 0118 18a10.5 10.5 0 01-10.5-10.5c0-1.25.223-2.454.635-3.572a.75.75 0 01.819-.162z"
-      clipRule="evenodd"
-    />
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const [isDark, setIsDark] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
+    setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
   if (!mounted) {
-    // Avoid rendering mismatch during hydration: render a placeholder or null
+    // Avoid rendering mismatch during hydration
     return (
-      <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+      <div className="bg-muted/50 border-foreground/10 h-9 w-9 animate-pulse rounded-lg border"></div>
     );
   }
 
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+      html.classList.remove('dark');
+      setIsDark(false);
+    } else {
+      html.classList.add('dark');
+      setIsDark(true);
+    }
+  };
+
   return (
     <button
-      onClick={() => {
-        if (theme === 'dark') {
-          setTheme('light');
-        } else {
-          setTheme('dark');
-        }
-        // Or to cycle: setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')
-      }}
-      className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      aria-label="Toggle theme"
+      onClick={toggleTheme}
+      className="group bg-muted/40 hover:bg-muted/60 border-foreground/5 hover:border-foreground/10 relative rounded-xl border p-2.5 shadow-sm transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-md active:scale-95"
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
-      {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+      <div className="relative">
+        <div className="text-foreground/80 hover:text-foreground transition-colors duration-200">
+          {isDark ? <SunIcon /> : <MoonIcon />}
+        </div>
+
+        {/* Subtle glow effect */}
+        <div className="from-primary/20 to-primary/10 absolute inset-0 -z-10 rounded-lg bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100"></div>
+      </div>
     </button>
   );
 }

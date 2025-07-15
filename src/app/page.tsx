@@ -128,9 +128,9 @@ export default function Home() {
                 {/* Browser-like header */}
                 <div className="bg-muted/50 border-foreground/10 border-b px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
-                    <div className="h-3 w-3 rounded-full bg-yellow-400"></div>
-                    <div className="h-3 w-3 rounded-full bg-green-400"></div>
+                    <div className="bg-foreground/20 h-3 w-3 rounded-full"></div>
+                    <div className="bg-foreground/15 h-3 w-3 rounded-full"></div>
+                    <div className="bg-foreground/25 h-3 w-3 rounded-full"></div>
                     <div className="text-foreground/60 ml-4 font-mono text-sm">
                       humans.inc/bryanfeng
                     </div>
