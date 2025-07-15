@@ -1,21 +1,21 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Sophisticated light mode - warm, professional */
-  --color-background: oklch(99% 0.005 85);
-  --color-foreground: oklch(15% 0.01 20);
-  --color-muted: oklch(96% 0.01 85);
-  --color-accent: oklch(25% 0.02 25);
-  --color-primary: oklch(35% 0.15 270);
-  --color-secondary: oklch(85% 0.02 80);
+  /* Warm, neutral, and inviting - subtle warmth without color dominance */
+  --color-background: oklch(97.5% 0.006 45);
+  --color-foreground: oklch(28% 0.008 40);
+  --color-muted: oklch(93% 0.01 50);
+  --color-accent: oklch(50% 0.015 45);
+  --color-primary: oklch(60% 0.06 180);
+  --color-secondary: oklch(88% 0.012 50);
 
-  /* Rich dark mode - deep, elegant */
-  --color-background-dark: oklch(8% 0.01 20);
-  --color-foreground-dark: oklch(92% 0.01 85);
-  --color-muted-dark: oklch(12% 0.01 20);
-  --color-accent-dark: oklch(88% 0.01 85);
-  --color-primary-dark: oklch(75% 0.15 270);
-  --color-secondary-dark: oklch(20% 0.02 25);
+  /* Soft dark mode - gentle and cozy */
+  --color-background-dark: oklch(12% 0.005 25);
+  --color-foreground-dark: oklch(88% 0.003 85);
+  --color-muted-dark: oklch(18% 0.005 25);
+  --color-accent-dark: oklch(75% 0.01 85);
+  --color-primary-dark: oklch(75% 0.06 180);
+  --color-secondary-dark: oklch(25% 0.01 30);
 }
 
 @layer base {

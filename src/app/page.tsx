@@ -1,104 +1,181 @@
 import Link from 'next/link';
+import { BioBlockView } from '@/features/blocks/components/BioBlockView';
+import { TextBlockView } from '@/features/blocks/components/TextBlockView';
+import { LinksBlockView } from '@/features/blocks/components/LinksBlockView';
+import type {
+  BioBlockContent,
+  TextBlockContent,
+  LinksBlockContent,
+} from '@/features/blocks/types';
 
 export default function Home() {
+  // Sample data for Bryan Feng's bio preview
+  const sampleBioContent: BioBlockContent = {
+    display_name: 'Bryan Feng',
+    tagline: 'Software Engineer & Product Builder',
+    bio: 'Passionate about creating meaningful digital experiences. Currently building tools that help people share their stories and connect with others.',
+    avatar_url: undefined,
+    links: [
+      { label: 'GitHub', url: 'https://github.com/bryfeng' },
+      { label: 'LinkedIn', url: 'https://linkedin.com/in/bryanfeng' },
+      { label: 'Email', url: 'mailto:bryan@example.com' },
+    ],
+  };
+
+  const sampleTextContent: TextBlockContent = {
+    text: "Welcome to my corner of the internet! Here you'll find my latest projects, thoughts on technology, and ways to connect with me.",
+    formatting: 'plain',
+  };
+
+  const sampleLinksContent: LinksBlockContent = {
+    items: [
+      {
+        title: 'My Latest Project: Humans Inc',
+        url: 'https://github.com/bryfeng/humans-inc',
+        description:
+          'A platform for writers and creators to build beautiful bio pages',
+      },
+      {
+        title: 'Blog: Building in Public',
+        url: 'https://blog.example.com',
+        description: 'Thoughts on product development and entrepreneurship',
+      },
+      {
+        title: 'Portfolio Website',
+        url: 'https://bryanfeng.com',
+        description: 'My complete portfolio and past work',
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section with Two Column Layout */}
       <section className="relative px-6 py-24 sm:py-32 lg:py-40">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="animate-fade-in">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-balance tracking-tight mb-8">
-              Your story,
-              <span className="text-primary block">beautifully told</span>
-            </h1>
-            <p className="text-xl sm:text-2xl text-accent/90 max-w-2xl mx-auto mb-12 text-pretty leading-relaxed">
-              Create a curated digital space that reflects your voice, thoughts, and creative work. 
-              For writers who want more than a social media profile.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                href="/signup"
-                className="bg-primary text-background px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] min-w-[200px]"
-              >
-                Start Writing
-              </Link>
-              <Link
-                href="/login"
-                className="text-foreground/80 hover:text-foreground px-8 py-4 rounded-xl font-medium text-lg hover:bg-muted/40 transition-all duration-200 min-w-[200px]"
-              >
-                Sign In
-              </Link>
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            {/* Left Column - Hero Content */}
+            <div className="space-y-8">
+              <div className="animate-fade-in">
+                <h1 className="mb-8 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+                  Your story,
+                  <span className="text-primary block">beautifully told</span>
+                </h1>
+                <p className="text-accent/90 mb-8 text-lg leading-relaxed text-pretty sm:text-xl">
+                  Create a curated digital space that reflects your voice,
+                  thoughts, and creative work. For writers who want more than a
+                  social media profile.
+                </p>
+
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <Link
+                    href="/signup"
+                    className="bg-primary text-background hover:bg-primary/90 min-w-[200px] rounded-xl px-8 py-4 text-center text-lg font-semibold shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+                  >
+                    Start Writing
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="text-foreground/80 hover:text-foreground hover:bg-muted/40 min-w-[200px] rounded-xl px-8 py-4 text-center text-lg font-medium transition-all duration-200"
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              </div>
+
+              {/* Feature highlights - simplified for left column */}
+              <div className="mt-12 grid gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                    <span className="text-lg">✍️</span>
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold">Curated Content</h3>
+                    <p className="text-accent/80 text-sm">
+                      Share your writing and thoughts in organized blocks
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                    <span className="text-lg">🎨</span>
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold">Beautiful Design</h3>
+                    <p className="text-accent/80 text-sm">
+                      Clean, reader-friendly layouts that make your content
+                      shine
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                    <span className="text-lg">🔗</span>
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold">One Link</h3>
+                    <p className="text-accent/80 text-sm">
+                      Replace multiple bio links with one comprehensive page
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Bio Preview */}
+            <div className="w-full max-w-md lg:max-w-lg lg:justify-self-end">
+              <div className="bg-background border-foreground/10 overflow-hidden rounded-2xl border shadow-2xl">
+                {/* Browser-like header */}
+                <div className="bg-muted/50 border-foreground/10 border-b px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
+                    <div className="h-3 w-3 rounded-full bg-yellow-400"></div>
+                    <div className="h-3 w-3 rounded-full bg-green-400"></div>
+                    <div className="text-foreground/60 ml-4 font-mono text-sm">
+                      humans.inc/bryanfeng
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preview Content */}
+                <div className="max-h-[600px] space-y-8 overflow-y-auto p-6">
+                  <BioBlockView content={sampleBioContent} />
+                  <TextBlockView content={sampleTextContent} />
+                  <LinksBlockView content={sampleLinksContent} />
+                </div>
+              </div>
+
+              {/* Preview Label */}
+              <div className="mt-4 text-center">
+                <span className="text-accent/60 bg-muted/50 rounded-full px-3 py-1 text-sm">
+                  Live Preview
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Subtle background gradient */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="px-6 py-16 bg-muted/30">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
-              Everything you need to share your work
-            </h2>
-            <p className="text-lg text-accent/80 max-w-2xl mx-auto text-pretty">
-              Simple, elegant tools designed specifically for writers and creators.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl bg-background/60 border border-foreground/5 hover:border-foreground/10 transition-colors duration-200">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">✍️</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Curated Content</h3>
-              <p className="text-accent/80 text-pretty">
-                Share your writing, recommendations, and thoughts in beautiful, organized blocks.
-              </p>
-            </div>
-
-            <div className="text-center p-8 rounded-2xl bg-background/60 border border-foreground/5 hover:border-foreground/10 transition-colors duration-200">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">🎨</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Beautiful Design</h3>
-              <p className="text-accent/80 text-pretty">
-                Clean, reader-friendly layouts that make your content shine.
-              </p>
-            </div>
-
-            <div className="text-center p-8 rounded-2xl bg-background/60 border border-foreground/5 hover:border-foreground/10 transition-colors duration-200">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">🔗</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">One Link</h3>
-              <p className="text-accent/80 text-pretty">
-                Replace multiple bio links with one beautiful, comprehensive page.
-              </p>
-            </div>
-          </div>
+          <div className="bg-primary/5 absolute top-0 left-1/4 h-96 w-96 rounded-full blur-3xl"></div>
+          <div className="bg-secondary/5 absolute right-1/4 bottom-0 h-64 w-64 rounded-full blur-3xl"></div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="px-6 py-24">
+      <section className="bg-muted/30 px-6 py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-balance">
+          <h2 className="mb-8 text-3xl font-bold text-balance sm:text-4xl">
             Ready to create your space?
           </h2>
-          <p className="text-xl text-accent/90 mb-12 text-pretty">
-            Join writers and creators who've chosen humans.inc as their digital home.
+          <p className="text-accent/90 mb-12 text-lg text-pretty">
+            Join writers and creators who've chosen humans.inc as their digital
+            home.
           </p>
-          
+
           <Link
             href="/signup"
-            className="bg-primary text-background px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] inline-block"
+            className="bg-primary text-background hover:bg-primary/90 inline-block rounded-xl px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
           >
             Get Started — It's Free
           </Link>
