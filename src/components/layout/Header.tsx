@@ -72,6 +72,9 @@ const Header = async () => {
                   </button>
                 </form>
               </div>
+
+              {/* Theme toggle for desktop logged-in users */}
+              <ThemeToggle />
             </div>
           ) : (
             // Logged out state - elegant and inviting
@@ -88,12 +91,11 @@ const Header = async () => {
               >
                 Get Started
               </Link>
+
+              {/* Theme toggle for desktop logged-out users */}
+              <ThemeToggle />
             </div>
           )}
-
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
         </div>
 
         {/* Mobile menu button - we'll enhance this later */}
