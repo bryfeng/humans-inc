@@ -42,17 +42,21 @@ export function TextBlockView({ content, title }: TextBlockViewProps) {
 
   return (
     <div className="space-y-4">
-      {title && <h2 className="text-foreground text-2xl font-bold">{title}</h2>}
+      {title && (
+        <h2 className="text-foreground text-2xl font-bold dark:text-white">
+          {title}
+        </h2>
+      )}
 
       <div className="prose prose-foreground max-w-none">
         {formatting === 'markdown' ? (
           <div
-            className="text-foreground/90 leading-relaxed"
+            className="text-foreground/90 leading-relaxed dark:text-gray-200"
             dangerouslySetInnerHTML={{ __html: renderedContent }}
           />
         ) : (
           <p
-            className="text-foreground/90 leading-relaxed whitespace-pre-wrap"
+            className="text-foreground/90 leading-relaxed whitespace-pre-wrap dark:text-gray-200"
             dangerouslySetInnerHTML={{ __html: renderedContent }}
           />
         )}

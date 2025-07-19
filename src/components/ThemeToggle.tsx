@@ -40,7 +40,22 @@ export function ThemeToggle() {
 
   React.useEffect(() => {
     setMounted(true);
-    setIsDark(document.documentElement.classList.contains('dark'));
+    // Check localStorage first, then system preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
+    const shouldBeDark =
+      savedTheme === 'dark' || (savedTheme === null && prefersDark);
+
+    if (shouldBeDark) {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      setIsDark(false);
+    }
   }, []);
 
   if (!mounted) {
@@ -54,9 +69,11 @@ export function ThemeToggle() {
     const html = document.documentElement;
     if (html.classList.contains('dark')) {
       html.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
       setIsDark(false);
     } else {
       html.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
       setIsDark(true);
     }
   };

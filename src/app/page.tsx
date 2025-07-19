@@ -124,14 +124,14 @@ export default function Home() {
 
             {/* Right Column - Bio Preview */}
             <div className="w-full max-w-md lg:max-w-lg lg:justify-self-end">
-              <div className="bg-background border-foreground/10 overflow-hidden rounded-2xl border shadow-2xl">
+              <div className="bg-background border-foreground/10 overflow-hidden rounded-2xl border shadow-2xl dark:border-gray-700 dark:bg-gray-900">
                 {/* Browser-like header */}
-                <div className="bg-muted/50 border-foreground/10 border-b px-4 py-3">
+                <div className="bg-muted/50 border-foreground/10 border-b px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
                   <div className="flex items-center gap-2">
                     <div className="bg-foreground/20 h-3 w-3 rounded-full"></div>
                     <div className="bg-foreground/15 h-3 w-3 rounded-full"></div>
                     <div className="bg-foreground/25 h-3 w-3 rounded-full"></div>
-                    <div className="text-foreground/60 ml-4 font-mono text-sm">
+                    <div className="text-foreground/60 ml-4 font-mono text-sm dark:text-gray-400">
                       humans.inc/bryanfeng
                     </div>
                   </div>
@@ -147,7 +147,7 @@ export default function Home() {
 
               {/* Preview Label */}
               <div className="mt-4 text-center">
-                <span className="text-accent/60 bg-muted/50 rounded-full px-3 py-1 text-sm">
+                <span className="text-accent/60 bg-muted/50 rounded-full px-3 py-1 text-sm dark:bg-gray-800 dark:text-gray-400">
                   Live Preview
                 </span>
               </div>

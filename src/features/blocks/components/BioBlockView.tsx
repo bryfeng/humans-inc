@@ -12,7 +12,11 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
 
   return (
     <div className="space-y-6">
-      {title && <h2 className="text-foreground text-2xl font-bold">{title}</h2>}
+      {title && (
+        <h2 className="text-foreground text-2xl font-bold dark:text-white">
+          {title}
+        </h2>
+      )}
 
       {/* Profile Header */}
       <div className="flex flex-col items-center space-y-4 text-center sm:flex-row sm:space-y-0 sm:space-x-6 sm:text-left">
@@ -28,8 +32,8 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
               priority
             />
           ) : (
-            <div className="bg-foreground/10 border-foreground/10 flex h-24 w-24 items-center justify-center rounded-full border-2 sm:h-32 sm:w-32">
-              <span className="text-foreground/50 text-2xl">
+            <div className="bg-foreground/10 border-foreground/10 flex h-24 w-24 items-center justify-center rounded-full border-2 sm:h-32 sm:w-32 dark:border-gray-600 dark:bg-gray-700">
+              <span className="text-foreground/50 text-2xl dark:text-gray-300">
                 {display_name?.charAt(0)?.toUpperCase() || '?'}
               </span>
             </div>
@@ -39,12 +43,14 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
         {/* Name and Tagline */}
         <div className="flex-1 space-y-2">
           {display_name && (
-            <h1 className="text-foreground text-3xl font-bold">
+            <h1 className="text-foreground text-3xl font-bold dark:text-white">
               {display_name}
             </h1>
           )}
           {tagline && (
-            <p className="text-foreground/80 text-lg font-medium">{tagline}</p>
+            <p className="text-foreground/80 text-lg font-medium dark:text-gray-300">
+              {tagline}
+            </p>
           )}
         </div>
       </div>
@@ -52,7 +58,7 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
       {/* Bio Text */}
       {bio && (
         <div className="prose prose-foreground max-w-none">
-          <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">
+          <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap dark:text-gray-200">
             {bio}
           </p>
         </div>
@@ -61,7 +67,9 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
       {/* Links */}
       {links.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-foreground text-lg font-semibold">Links</h3>
+          <h3 className="text-foreground text-lg font-semibold dark:text-white">
+            Links
+          </h3>
           <div className="flex flex-wrap gap-3">
             {links.map((link, index) => (
               <Link
@@ -69,7 +77,7 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-foreground/20 bg-background hover:bg-foreground/5 text-foreground hover:border-foreground/40 inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200"
+                className="border-foreground/20 bg-background hover:bg-foreground/5 text-foreground hover:border-foreground/40 inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-gray-500 dark:hover:bg-gray-700"
               >
                 {link.label}
                 <svg
