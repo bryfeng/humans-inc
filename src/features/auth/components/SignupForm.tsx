@@ -13,7 +13,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="bg-foreground text-background focus:ring-foreground/20 w-full rounded-lg px-4 py-3 font-medium transition-opacity hover:opacity-90 focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      className="bg-foreground text-background focus:ring-foreground/20 w-full rounded-lg px-4 py-3 font-medium transition-opacity hover:opacity-90 focus:ring-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? 'Creating Account...' : 'Create Account'}
     </button>
@@ -65,7 +65,7 @@ export function SignupForm() {
               type="email"
               autoComplete="email"
               required
-              className="border-foreground/20 bg-background text-foreground placeholder-foreground/40 focus:ring-foreground/20 focus:border-foreground/40 w-full rounded-lg border px-3 py-3 transition-colors focus:ring-2 focus:outline-none"
+              className="border-foreground/20 bg-background text-foreground placeholder-foreground/40 focus:ring-foreground/20 focus:border-foreground/40 w-full rounded-lg border px-3 py-3 transition-colors focus:ring-2 focus:outline-hidden"
               placeholder="Enter your email"
             />
           </div>
@@ -83,7 +83,7 @@ export function SignupForm() {
               type="password"
               autoComplete="new-password"
               required
-              className="border-foreground/20 bg-background text-foreground placeholder-foreground/40 focus:ring-foreground/20 focus:border-foreground/40 w-full rounded-lg border px-3 py-3 transition-colors focus:ring-2 focus:outline-none"
+              className="border-foreground/20 bg-background text-foreground placeholder-foreground/40 focus:ring-foreground/20 focus:border-foreground/40 w-full rounded-lg border px-3 py-3 transition-colors focus:ring-2 focus:outline-hidden"
               placeholder="Create a password"
             />
             <p className="text-foreground/60 mt-1 text-xs">

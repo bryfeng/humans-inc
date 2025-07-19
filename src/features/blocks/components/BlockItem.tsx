@@ -104,7 +104,7 @@ export function BlockItem({ block, isReordering, onEdit }: BlockItemProps) {
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center gap-2">
-            <span className="bg-foreground/10 text-foreground/70 rounded px-2 py-1 text-xs font-medium">
+            <span className="bg-foreground/10 text-foreground/70 rounded-sm px-2 py-1 text-xs font-medium">
               {getBlockTypeLabel(block.block_type)}
             </span>
             {block.title && (

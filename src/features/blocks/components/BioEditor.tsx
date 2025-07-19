@@ -201,14 +201,14 @@ export function BioEditor({ content, onChange }: BioEditorProps) {
                   value={link.label}
                   onChange={(e) => updateLink(index, 'label', e.target.value)}
                   placeholder="Label (e.g., Twitter)"
-                  className="border-foreground/20 bg-background focus:border-foreground/40 mb-2 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+                  className="border-foreground/20 bg-background focus:border-foreground/40 mb-2 w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
                 />
                 <input
                   type="url"
                   value={link.url}
                   onChange={(e) => updateLink(index, 'url', e.target.value)}
                   placeholder="https://..."
-                  className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+                  className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
                 />
               </div>
               <button

@@ -42,7 +42,7 @@ export function LinksBlockView({ content, title }: LinksBlockViewProps) {
                   {item.title}
                 </h3>
                 <svg
-                  className="text-foreground/40 group-hover:text-foreground/60 mt-1 ml-2 h-4 w-4 flex-shrink-0"
+                  className="text-foreground/40 group-hover:text-foreground/60 mt-1 ml-2 h-4 w-4 shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

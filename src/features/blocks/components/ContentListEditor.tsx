@@ -63,7 +63,7 @@ export function ContentListEditor({
                 value={item.title}
                 onChange={(e) => updateItem(index, { title: e.target.value })}
                 placeholder="Item title"
-                className="border-foreground/20 bg-background focus:border-foreground/40 flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
+                className="border-foreground/20 bg-background focus:border-foreground/40 flex-1 rounded-md border px-3 py-2 text-sm focus:outline-hidden"
               />
               <select
                 value={item.type || 'other'}
@@ -77,7 +77,7 @@ export function ContentListEditor({
                       | 'other',
                   })
                 }
-                className="border-foreground/20 bg-background focus:border-foreground/40 rounded-md border px-3 py-2 text-sm focus:outline-none"
+                className="border-foreground/20 bg-background focus:border-foreground/40 rounded-md border px-3 py-2 text-sm focus:outline-hidden"
               >
                 <option value="article">Article</option>
                 <option value="book">Book</option>
@@ -98,7 +98,7 @@ export function ContentListEditor({
               value={item.url || ''}
               onChange={(e) => updateItem(index, { url: e.target.value })}
               placeholder="URL (optional)"
-              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
             />
             <textarea
               value={item.annotation || ''}
@@ -107,7 +107,7 @@ export function ContentListEditor({
               }
               placeholder="Your thoughts or annotation..."
               rows={2}
-              className="border-foreground/20 bg-background focus:border-foreground/40 resize-vertical w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+              className="border-foreground/20 bg-background focus:border-foreground/40 resize-vertical w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
             />
           </div>
         ))}

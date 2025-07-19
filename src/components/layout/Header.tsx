@@ -32,11 +32,11 @@ const Header = async () => {
     profile?.display_name || profile?.username || user?.email?.split('@')[0];
 
   return (
-    <header className="border-foreground/5 bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-xl">
+    <header className="border-foreground/5 bg-background/80 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-xl dark:bg-black/95 dark:supports-backdrop-filter:bg-black/90">
       <nav className="container mx-auto flex items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="text-foreground hover:text-primary text-2xl font-bold tracking-tight transition-colors duration-200"
+          className="text-foreground hover:text-primary dark:hover:text-primary text-2xl font-bold tracking-tight transition-colors duration-200 dark:text-white"
         >
           humans.inc
         </Link>
@@ -51,7 +51,7 @@ const Header = async () => {
                     {displayName?.charAt(0) || 'U'}
                   </span>
                 </div>
-                <span className="text-accent text-sm font-medium">
+                <span className="text-accent text-sm font-medium dark:text-white">
                   {displayName}
                 </span>
               </div>
@@ -59,14 +59,14 @@ const Header = async () => {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/dashboard"
-                  className="text-foreground/70 hover:text-foreground hover:bg-muted/50 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+                  className="text-foreground/70 hover:text-foreground hover:bg-muted/50 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200 dark:text-white/90 dark:hover:text-white"
                 >
                   Dashboard
                 </Link>
                 <form action={logout} className="inline">
                   <button
                     type="submit"
-                    className="text-foreground/60 hover:text-foreground/80 hover:bg-muted/30 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+                    className="text-foreground/60 hover:text-foreground/80 hover:bg-muted/30 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200 dark:text-white/80 dark:hover:text-white"
                   >
                     Sign Out
                   </button>
@@ -87,7 +87,7 @@ const Header = async () => {
               </Link>
               <Link
                 href="/signup"
-                className="bg-primary text-background hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+                className="bg-primary text-background hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-semibold shadow-xs transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
               >
                 Get Started
               </Link>

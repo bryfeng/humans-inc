@@ -55,7 +55,7 @@ export function LinksEditor({ content, onChange }: LinksEditorProps) {
                 value={item.title}
                 onChange={(e) => updateItem(index, { title: e.target.value })}
                 placeholder="Link title"
-                className="border-foreground/20 bg-background focus:border-foreground/40 flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
+                className="border-foreground/20 bg-background focus:border-foreground/40 flex-1 rounded-md border px-3 py-2 text-sm focus:outline-hidden"
               />
               <button
                 onClick={() => removeItem(index)}
@@ -70,7 +70,7 @@ export function LinksEditor({ content, onChange }: LinksEditorProps) {
               value={item.url}
               onChange={(e) => updateItem(index, { url: e.target.value })}
               placeholder="URL"
-              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
             />
             <input
               type="text"
@@ -79,7 +79,7 @@ export function LinksEditor({ content, onChange }: LinksEditorProps) {
                 updateItem(index, { description: e.target.value })
               }
               placeholder="Description (optional)"
-              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+              className="border-foreground/20 bg-background focus:border-foreground/40 w-full rounded-md border px-3 py-2 text-sm focus:outline-hidden"
             />
           </div>
         ))}

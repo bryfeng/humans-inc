@@ -59,7 +59,7 @@ export function BlockList({ blocks: initialBlocks }: BlockListProps) {
         {initialBlocks.map((block) => (
           <div
             key={block.id}
-            className="bg-background border-foreground/10 rounded-lg border p-4 shadow-sm"
+            className="bg-background border-foreground/10 rounded-lg border p-4 shadow-xs"
           >
             <h4 className="text-foreground font-semibold">
               {block.title || `Untitled ${block.block_type} block`}

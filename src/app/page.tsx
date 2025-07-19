@@ -12,7 +12,7 @@ export default function Home() {
   // Sample data for Bryan Feng's bio preview
   const sampleBioContent: BioBlockContent = {
     display_name: 'Bryan Feng',
-    tagline: 'Software Engineer & Product Builder',
+    tagline: 'Human, Alchemist',
     bio: 'Passionate about creating meaningful digital experiences. Currently building tools that help people share their stories and connect with others.',
     avatar_url: undefined,
     links: [
@@ -61,7 +61,7 @@ export default function Home() {
                   Your story,
                   <span className="text-primary block">beautifully told</span>
                 </h1>
-                <p className="text-accent/90 mb-8 text-lg leading-relaxed text-pretty sm:text-xl">
+                <p className="text-accent/90 mb-8 text-lg leading-relaxed text-pretty sm:text-xl dark:text-white">
                   Create a curated digital space that reflects your voice,
                   thoughts, and creative work. For writers who want more than a
                   social media profile.
@@ -76,7 +76,7 @@ export default function Home() {
                   </Link>
                   <Link
                     href="/login"
-                    className="text-foreground/80 hover:text-foreground hover:bg-muted/40 min-w-[200px] rounded-xl px-8 py-4 text-center text-lg font-medium transition-all duration-200"
+                    className="text-foreground/80 hover:text-foreground hover:bg-muted/40 min-w-[200px] rounded-xl px-8 py-4 text-center text-lg font-medium transition-all duration-200 dark:text-white dark:hover:bg-gray-800 dark:hover:text-white"
                   >
                     Sign In
                   </Link>
@@ -86,35 +86,35 @@ export default function Home() {
               {/* Feature highlights - simplified for left column */}
               <div className="mt-12 grid gap-6">
                 <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                     <span className="text-lg">✍️</span>
                   </div>
                   <div>
                     <h3 className="mb-1 font-semibold">Curated Content</h3>
-                    <p className="text-accent/80 text-sm">
+                    <p className="text-accent/80 text-sm dark:text-white/80">
                       Share your writing and thoughts in organized blocks
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                     <span className="text-lg">🎨</span>
                   </div>
                   <div>
                     <h3 className="mb-1 font-semibold">Beautiful Design</h3>
-                    <p className="text-accent/80 text-sm">
+                    <p className="text-accent/80 text-sm dark:text-white/80">
                       Clean, reader-friendly layouts that make your content
                       shine
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                     <span className="text-lg">🔗</span>
                   </div>
                   <div>
                     <h3 className="mb-1 font-semibold">One Link</h3>
-                    <p className="text-accent/80 text-sm">
+                    <p className="text-accent/80 text-sm dark:text-white/80">
                       Replace multiple bio links with one comprehensive page
                     </p>
                   </div>
@@ -163,12 +163,12 @@ export default function Home() {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-muted/30 px-6 py-24">
+      <section className="bg-muted/30 px-6 py-24 dark:bg-black/95">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="mb-8 text-3xl font-bold text-balance sm:text-4xl">
             Ready to create your space?
           </h2>
-          <p className="text-accent/90 mb-12 text-lg text-pretty">
+          <p className="text-accent/90 mb-12 text-lg text-pretty dark:text-white">
             Join writers and creators who've chosen humans.inc as their digital
             home.
           </p>

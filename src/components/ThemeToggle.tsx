@@ -64,7 +64,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group bg-muted/40 hover:bg-muted/60 border-foreground/5 hover:border-foreground/10 relative rounded-xl border p-2.5 shadow-sm transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-md active:scale-95"
+      className="group bg-muted/40 hover:bg-muted/60 border-foreground/5 hover:border-foreground/10 relative rounded-xl border p-2.5 shadow-xs transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-md active:scale-95"
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
@@ -74,7 +74,7 @@ export function ThemeToggle() {
         </div>
 
         {/* Subtle glow effect */}
-        <div className="from-primary/20 to-primary/10 absolute inset-0 -z-10 rounded-lg bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100"></div>
+        <div className="from-primary/20 to-primary/10 absolute inset-0 -z-10 rounded-lg bg-linear-to-r opacity-0 blur-xs transition-opacity duration-300 group-hover:opacity-100"></div>
       </div>
     </button>
   );

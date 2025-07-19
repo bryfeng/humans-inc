@@ -26,7 +26,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={pending || !isUsernameAvailable}
-      className="bg-foreground text-background focus:ring-foreground/20 w-full rounded-lg px-4 py-3 font-medium transition-opacity hover:opacity-90 focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      className="bg-foreground text-background focus:ring-foreground/20 w-full rounded-lg px-4 py-3 font-medium transition-opacity hover:opacity-90 focus:ring-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? 'Updating...' : 'Update Profile'}
     </button>
@@ -70,7 +70,7 @@ export function ProfileForm({ profile }: { profile: UserProfile | null }) {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="bg-background border-foreground/20 placeholder-foreground/40 focus:ring-foreground/50 focus:border-foreground/50 mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none sm:text-sm"
+          className="bg-background border-foreground/20 placeholder-foreground/40 focus:ring-foreground/50 focus:border-foreground/50 mt-1 block w-full rounded-md border px-3 py-2 shadow-xs focus:outline-hidden sm:text-sm"
           required
         />
         <div className="mt-2 text-sm">
@@ -96,7 +96,7 @@ export function ProfileForm({ profile }: { profile: UserProfile | null }) {
           name="display_name"
           type="text"
           defaultValue={profile?.display_name ?? ''}
-          className="bg-background border-foreground/20 placeholder-foreground/40 focus:ring-foreground/50 focus:border-foreground/50 mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none sm:text-sm"
+          className="bg-background border-foreground/20 placeholder-foreground/40 focus:ring-foreground/50 focus:border-foreground/50 mt-1 block w-full rounded-md border px-3 py-2 shadow-xs focus:outline-hidden sm:text-sm"
         />
         {state?.errors?.display_name && (
           <p className="mt-2 text-sm text-red-600">

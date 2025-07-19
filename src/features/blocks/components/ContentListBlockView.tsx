@@ -142,7 +142,7 @@ export function ContentListBlockView({
                   {/* External link icon for items with URLs */}
                   {item.url && (
                     <svg
-                      className="text-foreground/40 group-hover:text-foreground/60 mt-0.5 h-4 w-4 flex-shrink-0"
+                      className="text-foreground/40 group-hover:text-foreground/60 mt-0.5 h-4 w-4 shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

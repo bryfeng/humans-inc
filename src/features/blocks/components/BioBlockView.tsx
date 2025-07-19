@@ -17,7 +17,7 @@ export function BioBlockView({ content, title }: BioBlockViewProps) {
       {/* Profile Header */}
       <div className="flex flex-col items-center space-y-4 text-center sm:flex-row sm:space-y-0 sm:space-x-6 sm:text-left">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {avatar_url ? (
             <Image
               src={avatar_url}
