@@ -7,8 +7,19 @@ import type {
   TextBlockContent,
   LinksBlockContent,
 } from '@/features/blocks/types';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
+export default async function Home() {
+  // Check if user is authenticated and redirect to dashboard
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
   // Sample data for Bryan Feng's bio preview
   const sampleBioContent: BioBlockContent = {
     display_name: 'Bryan Feng',

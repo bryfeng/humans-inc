@@ -47,7 +47,7 @@ export async function createBlock(data: CreateBlockData) {
     throw new Error(`Failed to create block: ${error.message}`);
   }
 
-  revalidatePath('/dashboard/edit-profile');
+  revalidatePath('/dashboard');
 }
 
 export async function updateBlock(data: UpdateBlockData) {
@@ -101,7 +101,7 @@ export async function updateBlock(data: UpdateBlockData) {
     throw new Error(`Failed to update block: ${error.message}`);
   }
 
-  revalidatePath('/dashboard/edit-profile');
+  revalidatePath('/dashboard');
 }
 
 export async function deleteBlock(blockId: string) {
@@ -140,7 +140,7 @@ export async function deleteBlock(blockId: string) {
     throw new Error(`Failed to delete block: ${error.message}`);
   }
 
-  revalidatePath('/dashboard/edit-profile');
+  revalidatePath('/dashboard');
 }
 
 export async function reorderBlocks(
@@ -184,7 +184,7 @@ export async function reorderBlocks(
     throw new Error('Failed to reorder some blocks');
   }
 
-  revalidatePath('/dashboard/edit-profile');
+  revalidatePath('/dashboard');
 }
 
 export async function getUserBlocks(userId: string) {

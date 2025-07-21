@@ -168,6 +168,10 @@
   animation: scale-in 0.2s ease-out;
 }
 
+@utility animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
+
 @utility btn-primary {
   /* Enhanced button styles */
   @apply bg-foreground text-background focus-visible:ring-primary rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
@@ -294,5 +298,16 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
