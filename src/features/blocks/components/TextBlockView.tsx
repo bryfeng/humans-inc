@@ -27,16 +27,29 @@ function parseMarkdown(text: string): string {
 }
 
 export function TextBlockView({ content, title }: TextBlockViewProps) {
-  const { text, formatting = 'plain' } = content;
+  const {
+    text,
+    formatting = 'plain',
+    richContent,
+    wordCount,
+    readingTime,
+  } = content;
 
   const renderedContent = useMemo(() => {
+    // Prioritize rich content if available
+    if (formatting === 'rich' && richContent) {
+      return richContent;
+    }
+
     if (formatting === 'markdown') {
       return parseMarkdown(text);
     }
-    return text.replace(/\n/g, '<br />');
-  }, [text, formatting]);
 
-  if (!text.trim()) {
+    return text.replace(/\n/g, '<br />');
+  }, [text, formatting, richContent]);
+
+  // Don't render if no content
+  if (!text.trim() && !richContent?.trim()) {
     return null;
   }
 
@@ -48,8 +61,22 @@ export function TextBlockView({ content, title }: TextBlockViewProps) {
         </h2>
       )}
 
-      <div className="prose prose-foreground max-w-none">
-        {formatting === 'markdown' ? (
+      {/* Reading Stats for Rich Content */}
+      {formatting === 'rich' && (wordCount || readingTime) && (
+        <div className="text-foreground/60 border-border flex items-center gap-4 border-b pb-3 text-sm">
+          {wordCount && <span>{wordCount} words</span>}
+          {readingTime && <span>{readingTime} min read</span>}
+        </div>
+      )}
+
+      {/* Content Rendering */}
+      <div className="prose prose-lg prose-foreground max-w-none">
+        {formatting === 'rich' ? (
+          <div
+            className="rich-content [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+            dangerouslySetInnerHTML={{ __html: renderedContent }}
+          />
+        ) : formatting === 'markdown' ? (
           <div
             className="text-foreground/90 leading-relaxed dark:text-gray-200"
             dangerouslySetInnerHTML={{ __html: renderedContent }}

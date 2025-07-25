@@ -35,7 +35,16 @@ export interface BioBlockContent extends Record<string, unknown> {
 
 export interface TextBlockContent extends Record<string, unknown> {
   text: string;
-  formatting?: 'plain' | 'markdown';
+  formatting?: 'plain' | 'markdown' | 'rich';
+  richContent?: string; // HTML content from TipTap
+  wordCount?: number;
+  readingTime?: number;
+  outline?: Array<{
+    id: string;
+    level: number;
+    text: string;
+    anchor: string;
+  }>;
 }
 
 export interface LinksBlockContent extends Record<string, unknown> {

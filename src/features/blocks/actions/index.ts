@@ -33,15 +33,19 @@ export async function createBlock(data: CreateBlockData) {
     redirect('/dashboard?setup=required');
   }
 
-  const { error } = await supabase.from('blocks').insert({
-    user_id: data.user_id,
-    position: data.position,
-    block_type: data.block_type,
-    title: data.title,
-    content: data.content,
-    config: data.config || {},
-    is_published: data.is_published ?? false, // Default to draft
-  });
+  const { data: createdBlock, error } = await supabase
+    .from('blocks')
+    .insert({
+      user_id: data.user_id,
+      position: data.position,
+      block_type: data.block_type,
+      title: data.title,
+      content: data.content,
+      config: data.config || {},
+      is_published: data.is_published ?? false, // Default to draft
+    })
+    .select()
+    .single();
 
   if (error) {
     console.error('Create block error:', error.message);
@@ -49,6 +53,7 @@ export async function createBlock(data: CreateBlockData) {
   }
 
   revalidatePath('/dashboard');
+  return createdBlock;
 }
 
 export async function updateBlock(data: UpdateBlockData) {
@@ -467,4 +472,210 @@ export async function unpublishBlock(blockId: string) {
   }
 
   revalidatePath('/dashboard');
+}
+
+// Enhanced block creation with immediate publish/save functionality
+export async function createAndPublishBlock(data: CreateBlockData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Ensure the user_id matches the authenticated user
+  if (data.user_id !== user.id) {
+    throw new Error('Unauthorized: Cannot create block for another user');
+  }
+
+  // Check that user has a profile record - redirect to setup if not
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile || !profile.username) {
+    // User needs to complete profile setup first
+    redirect('/dashboard?setup=required');
+  }
+
+  // Get the highest position to add block at the end
+  const { data: lastBlock, error: positionError } = await supabase
+    .from('blocks')
+    .select('position')
+    .eq('user_id', user.id)
+    .order('position', { ascending: false })
+    .limit(1)
+    .single();
+
+  const nextPosition = lastBlock ? lastBlock.position + 1 : 0;
+
+  const { data: createdBlock, error } = await supabase
+    .from('blocks')
+    .insert({
+      user_id: data.user_id,
+      position: nextPosition,
+      block_type: data.block_type,
+      title: data.title,
+      content: data.content,
+      config: data.config || {},
+      is_published: true, // Immediately published
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Create and publish block error:', error.message);
+    throw new Error(`Failed to create and publish block: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+  return createdBlock;
+}
+
+// Enhanced block creation that saves as draft (hidden)
+export async function createAndSaveBlock(data: CreateBlockData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Ensure the user_id matches the authenticated user
+  if (data.user_id !== user.id) {
+    throw new Error('Unauthorized: Cannot create block for another user');
+  }
+
+  // Check that user has a profile record - redirect to setup if not
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile || !profile.username) {
+    // User needs to complete profile setup first
+    redirect('/dashboard?setup=required');
+  }
+
+  const { data: createdBlock, error } = await supabase
+    .from('blocks')
+    .insert({
+      user_id: data.user_id,
+      position: data.position || 0,
+      block_type: data.block_type,
+      title: data.title,
+      content: data.content,
+      config: data.config || {},
+      is_published: false, // Saved as draft
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Create and save block error:', error.message);
+    throw new Error(`Failed to create and save block: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+  return createdBlock;
+}
+
+// Toggle block visibility (published/hidden)
+export async function toggleBlockVisibility(blockId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // First check if the block belongs to the authenticated user
+  const { data: existingBlock, error: fetchError } = await supabase
+    .from('blocks')
+    .select('user_id, is_published')
+    .eq('id', blockId)
+    .single();
+
+  if (fetchError) {
+    console.error('Fetch block error:', fetchError.message);
+    throw new Error(`Failed to fetch block: ${fetchError.message}`);
+  }
+
+  if (existingBlock.user_id !== user.id) {
+    throw new Error(
+      'Unauthorized: Cannot toggle visibility of block belonging to another user'
+    );
+  }
+
+  const newPublishedState = !existingBlock.is_published;
+
+  const { error } = await supabase
+    .from('blocks')
+    .update({
+      is_published: newPublishedState,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', blockId);
+
+  if (error) {
+    console.error('Toggle block visibility error:', error.message);
+    throw new Error(`Failed to toggle block visibility: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+  return newPublishedState;
+}
+
+// Auto-save functionality for future implementation
+export async function autoSaveBlock(
+  blockId: string,
+  content: Record<string, unknown>
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return; // Silent fail for auto-save
+  }
+
+  // First check if the block belongs to the authenticated user
+  const { data: existingBlock, error: fetchError } = await supabase
+    .from('blocks')
+    .select('user_id')
+    .eq('id', blockId)
+    .single();
+
+  if (fetchError || existingBlock.user_id !== user.id) {
+    return; // Silent fail for auto-save
+  }
+
+  const { error } = await supabase
+    .from('blocks')
+    .update({
+      content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', blockId);
+
+  if (error) {
+    console.error('Auto-save block error:', error.message);
+    // Silent fail for auto-save
+  }
+
+  // Don't revalidate for auto-save to avoid excessive re-renders
 }

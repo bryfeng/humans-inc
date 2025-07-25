@@ -6,6 +6,7 @@ export { BioEditor } from './BioEditor';
 
 // Editor components
 export { TextEditor } from './TextEditor';
+export { RichTextEditor } from './RichTextEditor';
 export { LinksEditor } from './LinksEditor';
 export { ContentListEditor } from './ContentListEditor';
 

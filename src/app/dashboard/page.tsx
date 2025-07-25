@@ -11,7 +11,6 @@ import {
   PagePreviewSection,
   InboxSection,
   DraftsSection,
-  CreateSection,
 } from '@/components/dashboard/sections';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import {
@@ -19,7 +18,31 @@ import {
   getPublishedBlocks,
   publishBlock,
   deleteBlock,
+  createAndPublishBlock,
+  createAndSaveBlock,
 } from '@/features/blocks/actions';
+import {
+  BlockTypeSelectorOverlay,
+  CreateBlockButton,
+} from '@/features/blocks/components/BlockTypeSelectorOverlay';
+import {
+  SmartPublishControls,
+  SaveFeedback,
+  BlockStatusIndicator,
+} from '@/features/blocks/components/SmartPublishControls';
+import {
+  BioEditor,
+  TextEditor,
+  LinksEditor,
+  ContentListEditor,
+} from '@/features/blocks/components';
+import type {
+  BlockType,
+  BioBlockContent,
+  TextBlockContent,
+  LinksBlockContent,
+  ContentListBlockContent,
+} from '@/features/blocks/types';
 import type { UserProfile } from '@/types/user';
 
 // Define local Block type to avoid boundary violation
@@ -34,6 +57,86 @@ interface Block {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// Inline CreateSection component to avoid boundary violations
+function CreateSectionComponent({
+  userId,
+  profile,
+  currentBlockCount,
+}: {
+  userId: string;
+  profile: UserProfile | null;
+  currentBlockCount: number;
+}) {
+  const [showBlockSelector, setShowBlockSelector] = useState(false);
+  const [selectedBlockType, setSelectedBlockType] = useState<BlockType | null>(
+    null
+  );
+  const [blockContent, setBlockContent] = useState<Record<string, unknown>>({});
+  const [blockTitle, setBlockTitle] = useState('');
+  const [isPublished, setIsPublished] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
+  const [recentlyUsed, setRecentlyUsed] = useState<BlockType[]>([]);
+  const router = useRouter();
+
+  if (!profile || !profile.username) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="mb-2 text-2xl font-bold">Create Content</h1>
+          <p className="text-foreground/60">
+            Complete your profile setup to start creating content blocks
+          </p>
+        </div>
+        <div className="bg-background border-foreground/10 rounded-lg border p-8 text-center">
+          <div className="mb-4 text-4xl">🚀</div>
+          <h3 className="mb-2 font-semibold">Complete Your Profile First</h3>
+          <p className="text-foreground/60 mb-4 text-sm">
+            Set up your username and basic profile information before creating
+            content blocks.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="mb-2 text-2xl font-bold">Create Content</h1>
+        <p className="text-foreground/60">
+          Create and publish new blocks with the rich text editor
+        </p>
+      </div>
+
+      <div className="bg-background border-foreground/10 rounded-lg border p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">Create New Block</h2>
+            <p className="text-foreground/60 text-sm">
+              Choose a block type to get started
+            </p>
+          </div>
+          <CreateBlockButton
+            onClick={() => setShowBlockSelector(true)}
+            disabled={isSaving}
+          />
+        </div>
+      </div>
+
+      <BlockTypeSelectorOverlay
+        isOpen={showBlockSelector}
+        onClose={() => setShowBlockSelector(false)}
+        onSelectType={() => {}} // Simplified for now
+        recentlyUsed={recentlyUsed}
+      />
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -157,7 +260,7 @@ export default function DashboardPage() {
         );
       case 'create':
         return (
-          <CreateSection
+          <CreateSectionComponent
             userId={user?.id || ''}
             profile={profile}
             currentBlockCount={blocks.length}

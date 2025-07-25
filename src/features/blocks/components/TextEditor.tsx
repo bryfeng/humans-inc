@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import type { TextBlockContent } from '../types';
+import { RichTextEditor } from './RichTextEditor';
 
 interface TextEditorProps {
   content: TextBlockContent;
@@ -8,6 +10,39 @@ interface TextEditorProps {
 }
 
 export function TextEditor({ content, onChange }: TextEditorProps) {
+  const [editorMode, setEditorMode] = useState<'rich' | 'simple'>(
+    content.formatting === 'rich' ? 'rich' : 'simple'
+  );
+
+  if (editorMode === 'rich') {
+    return (
+      <div className="animate-fade-in space-y-4">
+        {/* Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-foreground text-lg font-semibold">
+            Rich Text Editor
+          </h3>
+          <button
+            type="button"
+            onClick={() => setEditorMode('simple')}
+            className="text-foreground/60 hover:text-foreground text-sm underline transition-colors"
+          >
+            Switch to Simple Editor
+          </button>
+        </div>
+
+        {/* Rich Text Editor */}
+        <RichTextEditor
+          content={content}
+          onChange={onChange}
+          placeholder="Start writing your story..."
+          autofocus={true}
+        />
+      </div>
+    );
+  }
+
+  // Simple/Legacy Editor Mode
   const textContent = content;
   const wordCount = textContent.text
     ? textContent.text
@@ -19,6 +54,30 @@ export function TextEditor({ content, onChange }: TextEditorProps) {
 
   return (
     <div className="animate-fade-in space-y-4">
+      {/* Mode Toggle */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-foreground text-lg font-semibold">
+          Simple Text Editor
+        </h3>
+        <button
+          type="button"
+          onClick={() => {
+            setEditorMode('rich');
+            // Convert to rich format
+            onChange({
+              ...textContent,
+              formatting: 'rich',
+              richContent: textContent.text
+                ? `<p>${textContent.text.replace(/\n/g, '</p><p>')}</p>`
+                : '',
+            });
+          }}
+          className="bg-primary text-background hover:bg-primary/90 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+        >
+          Switch to Rich Editor ✨
+        </button>
+      </div>
+
       <div className="animate-slide-up">
         <textarea
           value={textContent.text || ''}
