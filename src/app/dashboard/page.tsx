@@ -64,10 +64,14 @@ function CreateSectionComponent({
   userId,
   profile,
   currentBlockCount,
+  draftBlocks,
+  publishedBlocks,
 }: {
   userId: string;
   profile: UserProfile | null;
   currentBlockCount: number;
+  draftBlocks: Block[];
+  publishedBlocks: Block[];
 }) {
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectedBlockType, setSelectedBlockType] = useState<BlockType | null>(
@@ -134,6 +138,7 @@ function CreateSectionComponent({
         onClose={() => setShowBlockSelector(false)}
         onSelectType={() => {}} // Simplified for now
         recentlyUsed={recentlyUsed}
+        existingBlocks={[...draftBlocks, ...publishedBlocks]}
       />
     </div>
   );
@@ -264,6 +269,8 @@ export default function DashboardPage() {
             userId={user?.id || ''}
             profile={profile}
             currentBlockCount={blocks.length}
+            draftBlocks={draftBlocks}
+            publishedBlocks={publishedBlocks}
           />
         );
       default:

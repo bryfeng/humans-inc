@@ -84,7 +84,7 @@ export function TextEditor({ content, onChange }: TextEditorProps) {
           onChange={(e) => onChange({ ...textContent, text: e.target.value })}
           placeholder="Enter your text content..."
           rows={8}
-          className="input-primary min-h-32 resize-y"
+          className="border-foreground/20 bg-background focus:border-foreground/40 focus:ring-primary/20 min-h-32 w-full resize-y rounded-lg border px-4 py-3 text-base focus:ring-2 focus:outline-none"
         />
         <div className="text-foreground/60 mt-2 flex items-center justify-between text-xs">
           <span>
@@ -110,7 +110,7 @@ export function TextEditor({ content, onChange }: TextEditorProps) {
               formatting: e.target.value as 'plain' | 'markdown',
             })
           }
-          className="input-primary"
+          className="border-foreground/20 bg-background focus:border-foreground/40 focus:ring-primary/20 w-full rounded-lg border px-4 py-3 text-base focus:ring-2 focus:outline-none"
         >
           <option value="plain">Plain Text</option>
           <option value="markdown">Markdown</option>

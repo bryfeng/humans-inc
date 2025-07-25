@@ -1,13 +1,28 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { BlockType } from '../types';
+
+interface Block {
+  id: string;
+  user_id: string;
+  position: number;
+  block_type: string;
+  title?: string;
+  content: Record<string, unknown>;
+  config: Record<string, unknown>;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface BlockTypeSelectorOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectType: (blockType: BlockType) => void;
   recentlyUsed?: BlockType[];
+  existingBlocks?: Block[];
 }
 
 const BLOCK_TYPES: Array<{
@@ -67,7 +82,10 @@ export function BlockTypeSelectorOverlay({
   onClose,
   onSelectType,
   recentlyUsed = [],
+  existingBlocks = [],
 }: BlockTypeSelectorOverlayProps) {
+  const router = useRouter();
+
   if (!isOpen) return null;
 
   // Group recently used types for quick access
@@ -79,8 +97,19 @@ export function BlockTypeSelectorOverlay({
   );
 
   const handleSelectType = (blockType: BlockType) => {
-    onSelectType(blockType);
+    // Check for existing bio block and redirect to edit instead
+    if (blockType === 'bio') {
+      const existingBio = existingBlocks.find((b) => b.block_type === 'bio');
+      if (existingBio) {
+        onClose();
+        router.push(`/dashboard/edit-block/${existingBio.id}?focus=true`);
+        return;
+      }
+    }
+
+    // Route to dedicated creation pages
     onClose();
+    router.push(`/dashboard/create/${blockType.replace('_', '-')}`);
   };
 
   return (
@@ -122,6 +151,7 @@ export function BlockTypeSelectorOverlay({
                   blockType={blockType}
                   onSelect={() => handleSelectType(blockType.type)}
                   isRecent
+                  existingBlocks={existingBlocks}
                 />
               ))}
             </div>
@@ -142,6 +172,7 @@ export function BlockTypeSelectorOverlay({
                   key={blockType.type}
                   blockType={blockType}
                   onSelect={() => handleSelectType(blockType.type)}
+                  existingBlocks={existingBlocks}
                 />
               )
             )}
@@ -167,17 +198,28 @@ function BlockTypeCard({
   blockType,
   onSelect,
   isRecent = false,
+  existingBlocks = [],
 }: {
   blockType: (typeof BLOCK_TYPES)[0];
   onSelect: () => void;
   isRecent?: boolean;
+  existingBlocks?: Block[];
 }) {
+  const hasExisting =
+    blockType.type === 'bio' &&
+    existingBlocks.some((b) => b.block_type === 'bio');
+
+  const buttonText = hasExisting ? 'Edit Existing' : 'Create New';
+  const description = hasExisting
+    ? 'You already have a bio block. Click to edit it.'
+    : blockType.description;
+
   return (
     <button
       onClick={onSelect}
       className={`border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 group relative rounded-lg border p-4 text-left transition-all ${
         isRecent ? 'ring-1 ring-blue-500/20' : ''
-      }`}
+      } ${hasExisting ? 'border-amber-300/40 bg-amber-50/10' : ''}`}
     >
       {isRecent && (
         <div className="absolute -top-2 -right-2">
@@ -189,11 +231,23 @@ function BlockTypeCard({
 
       <div className="mb-3 flex items-start gap-3">
         <span className="text-2xl" role="img" aria-label={blockType.label}>
-          {blockType.icon}
+          {hasExisting ? '✏️' : blockType.icon}
         </span>
         <div className="min-w-0 flex-1">
-          <h4 className="font-semibold">{blockType.label}</h4>
-          <p className="text-foreground/60 text-sm">{blockType.description}</p>
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold">{blockType.label}</h4>
+            {hasExisting && (
+              <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                Exists
+              </span>
+            )}
+          </div>
+          <p className="text-foreground/60 text-sm">{description}</p>
+          {hasExisting && (
+            <p className="mt-1 text-xs font-medium text-amber-600">
+              {buttonText}
+            </p>
+          )}
         </div>
       </div>
 

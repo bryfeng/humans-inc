@@ -707,144 +707,111 @@ npx supabase gen types typescript --project-id=<id> --schema=public > types/supa
 - **Type definitions**: `src/features/*/types/`
 - **Shared utilities**: `src/lib/`
 
-## Phase 8: Enhanced Content Creation Architecture
+## Routing Architecture
 
-### Content Creation Components (January 2025)
+### Dashboard Routes Structure
 
-Phase 8 introduced a comprehensive content creation system that replaced placeholder messages with a fully functional hybrid dashboard interface:
+```
+/dashboard
+├── /                          # Main dashboard with sidebar navigation
+├── /edit-profile             # Profile editing (existing)
+├── /create/                  # Content creation routes (NEW)
+│   ├── /text                # Full-screen text block creation
+│   ├── /content-list        # Full-screen content list creation
+│   ├── /links               # Full-screen links creation
+│   └── /bio                 # Full-screen bio creation
+└── /edit-block/
+    └── /[blockId]           # Edit existing block with focus mode support
+        └── ?focus=true      # Query param for focus mode
+```
 
-#### New Components
+### Route Behavior
 
-1. **BlockTypeSelectorOverlay** (`src/features/blocks/components/BlockTypeSelectorOverlay.tsx`)
+1. **Dashboard Creation Flow**:
 
-   - Space-efficient overlay for block type selection
-   - Recently used block types with star indicators
-   - Educational block type cards with features and descriptions
-   - Smooth animations and responsive design
-   - Click-outside-to-close and ESC key support
+   - User clicks "Create Block" → Opens `BlockTypeSelectorOverlay`
+   - Selects block type → Routes to `/dashboard/create/{type}`
+   - Bio block with existing → Routes to `/dashboard/edit-block/{id}?focus=true`
 
-2. **SmartPublishControls** (`src/features/blocks/components/SmartPublishControls.tsx`)
+2. **Focus Mode Support**:
 
-   - Toggle between hidden/published states with visual feedback
-   - Dynamic button text: "Save" vs "Save & Publish"
-   - Visual status indicators (green dot for published, gray for hidden)
-   - Integrated save/publish functionality with loading states
+   - All creation routes are full-screen by default
+   - Edit routes support `?focus=true` parameter
+   - Clean navigation back to dashboard
+   - Professional save/publish workflow
 
-3. **SaveFeedback & BlockStatusIndicator** (same file as SmartPublishControls)
-   - Success/error feedback messages with dismiss functionality
-   - Real-time status indicators showing published state and last saved time
-   - Time-ago formatting for user-friendly timestamps
+3. **Smart Redirects**:
+   - Bio block duplication prevented through intelligent routing
+   - Seamless flow between creation and editing modes
+   - Consistent user experience across all block types
 
-#### Enhanced CreateSection Architecture
+## Phase 9: Focus Mode & Enhanced Content Creation (January 2025)
 
-The `CreateSection.tsx` component was completely redesigned with a hybrid split-panel approach:
+### Focus Mode Architecture
+
+Phase 9 introduced a comprehensive focus mode system that addresses cramped editing interfaces and duplicate content issues:
+
+#### Key Improvements
+
+1. **Smart Block Validation**:
+
+   - Prevents duplicate bio blocks with intelligent redirection
+   - Visual indicators for existing blocks ("Edit Existing" vs "Create New")
+   - Automatic routing to edit existing bio blocks with focus mode enabled
+
+2. **Dedicated Creation Routes**:
+
+   - Full-screen creation pages for distraction-free content creation
+   - Professional sticky headers with save/publish controls
+   - Enhanced form interfaces with larger inputs and better spacing
+
+3. **Enhanced Editor Interfaces**:
+
+   - RichTextEditor: 60vh minimum height (was 200px) with Zen mode toggle
+   - ContentListEditor: Larger form fields, better spacing, improved UX
+   - LinksEditor: Enhanced with larger inputs and better touch targets
+   - TextEditor: 400px minimum height for simple mode
+
+4. **Focus Mode Features**:
+   - Zen mode in RichTextEditor that hides all distractions
+   - Exit focus mode functionality
+   - Responsive design that works on all screen sizes
+   - Consistent navigation patterns
+
+#### Technical Implementation
+
+**Block Type Selector with Validation**:
 
 ```typescript
-// Split-panel layout structure
-<div className="split-panel-interface">
-  {!selectedBlockType ? (
-    // Initial state: Block type selection
-    <BlockTypeSelectionView />
-  ) : (
-    <div className="split-panels">
-      {/* Left Panel: Tools & Controls */}
-      <div className="left-panel">
-        <BlockMetadata />
-        <SmartPublishControls />
-        <CreationTips />
-      </div>
+const handleSelectType = (blockType: BlockType) => {
+  // Smart bio block handling
+  if (blockType === 'bio') {
+    const existingBio = existingBlocks.find((b) => b.block_type === 'bio');
+    if (existingBio) {
+      router.push(`/dashboard/edit-block/${existingBio.id}?focus=true`);
+      return;
+    }
+  }
 
-      {/* Right Panel: Live Editor */}
-      <div className="right-panel">
-        <LiveEditor blockType={selectedBlockType} />
-      </div>
-    </div>
-  )}
-</div>
+  // Route to dedicated creation pages
+  router.push(`/dashboard/create/${blockType}`);
+};
 ```
 
-#### Enhanced Block Actions
+**Enhanced Editor Components**:
 
-New server actions added to support the creation workflow:
+- All editors now support full-screen dedicated creation pages
+- Improved form field sizing (base text vs sm, px-4 py-3 vs px-3 py-2)
+- Better visual hierarchy and spacing (space-y-6 vs space-y-3)
+- Professional styling with proper focus states and hover effects
 
-1. **createAndPublishBlock()** - Creates block and immediately publishes with automatic positioning
-2. **createAndSaveBlock()** - Creates block as draft (hidden)
-3. **toggleBlockVisibility()** - Switches between published/hidden states
-4. **autoSaveBlock()** - Foundation for future Gmail-style auto-save (silent fail implementation)
-5. **publishBlock()/unpublishBlock()** - Individual publish/unpublish functions
-6. **Enhanced error handling** - All functions include proper authentication, ownership validation, and error reporting
+#### User Experience Improvements
 
-#### Current Implementation Status (January 2025)
-
-**✅ Fully Implemented Components:**
-
-- `BlockTypeSelectorOverlay.tsx` - 180+ lines with educational cards and recently used tracking
-- `SmartPublishControls.tsx` - Complete with SaveFeedback and BlockStatusIndicator
-- `CreateSection.tsx` - 400+ lines split-panel implementation with state management
-- Enhanced block actions with 20+ server functions supporting full workflow
-
-**✅ Key Features Delivered:**
-
-- LocalStorage persistence for recently used block types
-- Keyboard shortcuts (ESC key) for overlay management
-- Auto-refresh after successful block creation
-- Real-time visual feedback with success/error states
-- Mobile-responsive design with panel stacking
-- Type-safe content handling with proper casting
-
-#### User Experience Flow
-
-```
-1. User clicks "Create Block +" button
-2. BlockTypeSelectorOverlay opens with educational cards
-3. User selects block type (saved to recently used)
-4. Split-panel interface loads with:
-   - Left: Publishing controls, tips, metadata
-   - Right: Live editor for selected block type
-5. User edits content with real-time feedback
-6. SmartPublishControls toggle hidden/published state
-7. Save button text adapts: "Save" or "Save & Publish"
-8. Block saves with immediate positioning and feedback
-9. Success message shows, interface resets after 2s
-```
-
-#### Technical Implementation Details
-
-**State Management Pattern**:
-
-```typescript
-// CreateSection state structure
-const [selectedBlockType, setSelectedBlockType] = useState<BlockType | null>(
-  null
-);
-const [blockContent, setBlockContent] = useState<Record<string, unknown>>({});
-const [isPublished, setIsPublished] = useState(false);
-const [isSaving, setIsSaving] = useState(false);
-const [saveStatus, setSaveStatus] = useState<SaveStatus>({
-  type: null,
-  message: '',
-});
-const [recentlyUsed, setRecentlyUsed] = useState<BlockType[]>([]);
-```
-
-**LocalStorage Integration**:
-
-- Recently used block types persist across sessions
-- Keyboard shortcuts (ESC) for overlay management
-- Auto-refresh after successful block creation
-
-**Type Safety Enhancements**:
-
-- Proper type casting for block content: `blockContent as BioBlockContent`
-- Const assertions for config: `'medium' as const`
-- Strict TypeScript interfaces for all new components
-
-#### Responsive Design Strategy
-
-- **Desktop**: Side-by-side split panels with fixed left panel width
-- **Mobile**: Stacked panels with full-width layout
-- **Overlay**: Responsive grid that adapts to screen size
-- **Touch Support**: Proper touch targets and gesture handling
+1. **Distraction-Free Writing**: Full-screen editing environments without sidebar clutter
+2. **Better Content Creation**: Larger editing canvases encourage higher quality content
+3. **Smart Duplicate Prevention**: Users can't accidentally create duplicate bio blocks
+4. **Professional Interface**: Consistent styling and better visual feedback
+5. **Mobile-Friendly**: Full-screen editing works better on smaller screens
 
 ### Architecture Decision Log
 
@@ -852,10 +819,10 @@ const [recentlyUsed, setRecentlyUsed] = useState<BlockType[]>([]);
 - **2024-12**: Implemented strict boundary enforcement to prevent coupling
 - **2024-12**: Adopted Server Actions over API routes for simplicity
 - **2024-12**: Used JSONB for flexible block content vs rigid schemas
-- **2025-01**: Implemented hybrid split-panel creation interface (Phase 8)
-- **2025-01**: Added overlay-based block type selection for space efficiency
-- **2025-01**: Introduced smart publishing workflow with toggle controls
-- **2025-01**: Built foundation for future Gmail-style auto-save functionality
+- **2025-01**: Implemented focus mode with dedicated creation routes (Phase 9)
+- **2025-01**: Added smart block validation to prevent duplicates
+- **2025-01**: Enhanced all editor interfaces for better content creation
+- **2025-01**: Introduced Zen mode for distraction-free writing
 
 ---
 
