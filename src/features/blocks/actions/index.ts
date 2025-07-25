@@ -40,6 +40,7 @@ export async function createBlock(data: CreateBlockData) {
     title: data.title,
     content: data.content,
     config: data.config || {},
+    is_published: data.is_published ?? false, // Default to draft
   });
 
   if (error) {
@@ -81,12 +82,22 @@ export async function updateBlock(data: UpdateBlockData) {
 
   // Build update object with only provided fields
   const updateData: Partial<
-    Pick<Block, 'title' | 'content' | 'config' | 'position' | 'updated_at'>
+    Pick<
+      Block,
+      | 'title'
+      | 'content'
+      | 'config'
+      | 'position'
+      | 'is_published'
+      | 'updated_at'
+    >
   > = {};
   if (data.title !== undefined) updateData.title = data.title;
   if (data.content !== undefined) updateData.content = data.content;
   if (data.config !== undefined) updateData.config = data.config;
   if (data.position !== undefined) updateData.position = data.position;
+  if (data.is_published !== undefined)
+    updateData.is_published = data.is_published;
 
   // Always update the updated_at timestamp
   updateData.updated_at = new Date().toISOString();
@@ -276,6 +287,7 @@ export async function getPublicUserBlocks(userId: string) {
     .from('blocks')
     .select('*')
     .eq('user_id', userId)
+    .eq('is_published', true)
     .order('position', { ascending: true });
 
   if (error) {
@@ -302,4 +314,157 @@ export async function getPublicProfile(username: string) {
   }
 
   return profile;
+}
+
+// Draft-specific functions
+export async function getDraftBlocks(userId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  if (userId !== user.id) {
+    throw new Error('Unauthorized: Cannot fetch draft blocks for another user');
+  }
+
+  const { data: blocks, error } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_published', false)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    console.error('Fetch draft blocks error:', error.message);
+    throw new Error(`Failed to fetch draft blocks: ${error.message}`);
+  }
+
+  return blocks || [];
+}
+
+export async function getPublishedBlocks(userId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  if (userId !== user.id) {
+    throw new Error(
+      'Unauthorized: Cannot fetch published blocks for another user'
+    );
+  }
+
+  const { data: blocks, error } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_published', true)
+    .order('position', { ascending: true });
+
+  if (error) {
+    console.error('Fetch published blocks error:', error.message);
+    throw new Error(`Failed to fetch published blocks: ${error.message}`);
+  }
+
+  return blocks || [];
+}
+
+export async function publishBlock(blockId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // First check if the block belongs to the authenticated user
+  const { data: existingBlock, error: fetchError } = await supabase
+    .from('blocks')
+    .select('user_id')
+    .eq('id', blockId)
+    .single();
+
+  if (fetchError) {
+    console.error('Fetch block error:', fetchError.message);
+    throw new Error(`Failed to fetch block: ${fetchError.message}`);
+  }
+
+  if (existingBlock.user_id !== user.id) {
+    throw new Error(
+      'Unauthorized: Cannot publish block belonging to another user'
+    );
+  }
+
+  const { error } = await supabase
+    .from('blocks')
+    .update({
+      is_published: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', blockId);
+
+  if (error) {
+    console.error('Publish block error:', error.message);
+    throw new Error(`Failed to publish block: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+}
+
+export async function unpublishBlock(blockId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // First check if the block belongs to the authenticated user
+  const { data: existingBlock, error: fetchError } = await supabase
+    .from('blocks')
+    .select('user_id')
+    .eq('id', blockId)
+    .single();
+
+  if (fetchError) {
+    console.error('Fetch block error:', fetchError.message);
+    throw new Error(`Failed to fetch block: ${fetchError.message}`);
+  }
+
+  if (existingBlock.user_id !== user.id) {
+    throw new Error(
+      'Unauthorized: Cannot unpublish block belonging to another user'
+    );
+  }
+
+  const { error } = await supabase
+    .from('blocks')
+    .update({
+      is_published: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', blockId);
+
+  if (error) {
+    console.error('Unpublish block error:', error.message);
+    throw new Error(`Failed to unpublish block: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
 }

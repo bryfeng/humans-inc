@@ -14,6 +14,12 @@ import {
   CreateSection,
 } from '@/components/dashboard/sections';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
+import {
+  getDraftBlocks,
+  getPublishedBlocks,
+  publishBlock,
+  deleteBlock,
+} from '@/features/blocks/actions';
 import type { UserProfile } from '@/types/user';
 
 // Define local Block type to avoid boundary violation
@@ -25,6 +31,7 @@ interface Block {
   title?: string;
   content: Record<string, unknown>;
   config: Record<string, unknown>;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -35,7 +42,10 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [draftBlocks, setDraftBlocks] = useState<Block[]>([]);
+  const [publishedBlocks, setPublishedBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
+  const [draftsLoading, setDraftsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,10 +76,48 @@ export default function DashboardPage() {
       setProfile(profileResult.data || null);
       setBlocks(blocksResult.data || []);
       setLoading(false);
+
+      // Load draft and published blocks separately
+      try {
+        const [drafts, published] = await Promise.all([
+          getDraftBlocks(authUser.id),
+          getPublishedBlocks(authUser.id),
+        ]);
+        setDraftBlocks(drafts);
+        setPublishedBlocks(published);
+      } catch (error) {
+        console.error('Error loading draft/published blocks:', error);
+      } finally {
+        setDraftsLoading(false);
+      }
     }
 
     loadData();
   }, [router]);
+
+  const handlePublish = async (blockId: string) => {
+    if (!user) return;
+
+    await publishBlock(blockId);
+
+    // Refresh data
+    const [drafts, published] = await Promise.all([
+      getDraftBlocks(user.id),
+      getPublishedBlocks(user.id),
+    ]);
+    setDraftBlocks(drafts);
+    setPublishedBlocks(published);
+  };
+
+  const handleDelete = async (blockId: string) => {
+    if (!user) return;
+
+    await deleteBlock(blockId);
+
+    // Refresh drafts
+    const drafts = await getDraftBlocks(user.id);
+    setDraftBlocks(drafts);
+  };
 
   if (loading) {
     return (
@@ -85,11 +133,28 @@ export default function DashboardPage() {
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'preview':
-        return <PagePreviewSection profile={profile} blocks={blocks} />;
+        return (
+          <PagePreviewSection
+            profile={profile}
+            blocks={blocks}
+            publishedBlocks={publishedBlocks}
+            draftBlocks={draftBlocks}
+            loading={draftsLoading}
+          />
+        );
       case 'inbox':
         return <InboxSection />;
       case 'drafts':
-        return <DraftsSection blocks={blocks} />;
+        return (
+          <DraftsSection
+            blocks={blocks}
+            draftBlocks={draftBlocks}
+            publishedCount={publishedBlocks.length}
+            loading={draftsLoading}
+            onPublish={handlePublish}
+            onDelete={handleDelete}
+          />
+        );
       case 'create':
         return (
           <CreateSection
@@ -99,7 +164,15 @@ export default function DashboardPage() {
           />
         );
       default:
-        return <PagePreviewSection profile={profile} blocks={blocks} />;
+        return (
+          <PagePreviewSection
+            profile={profile}
+            blocks={blocks}
+            publishedBlocks={publishedBlocks}
+            draftBlocks={draftBlocks}
+            loading={draftsLoading}
+          />
+        );
     }
   };
 

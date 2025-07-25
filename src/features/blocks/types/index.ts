@@ -7,6 +7,7 @@ export interface Block {
   title?: string;
   content: Record<string, unknown>;
   config: Record<string, unknown>;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +74,7 @@ export interface CreateBlockData {
   title?: string;
   content: Record<string, unknown>;
   config?: BlockConfig;
+  is_published?: boolean;
 }
 
 // For updating existing blocks
@@ -82,4 +84,5 @@ export interface UpdateBlockData {
   content?: Record<string, unknown>;
   config?: BlockConfig;
   position?: number;
+  is_published?: boolean;
 }
