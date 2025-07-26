@@ -123,11 +123,12 @@ export function RichTextEditor({
     immediatelyRender: false, // Fix SSR hydration issue
     editorProps: {
       attributes: {
-        class: `prose prose-lg max-w-none focus:outline-none ${
+        class: `prose prose-xl max-w-none focus:outline-none leading-relaxed ${
           isFocused
             ? 'prose-headings:text-foreground prose-p:text-foreground'
             : 'prose-headings:text-foreground/90 prose-p:text-foreground/80'
         }`,
+        style: 'min-height: 60vh; padding: 1rem 0;',
       },
     },
     onUpdate: ({ editor }) => {
@@ -206,12 +207,8 @@ export function RichTextEditor({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Toolbar */}
-      <div
-        className={`bg-background border-border flex items-center gap-2 rounded-lg border p-2 transition-all duration-200 ${
-          isFocused ? 'border-primary/30 shadow-sm' : 'border-border'
-        }`}
-      >
+      {/* Toolbar - Minimal and Borderless */}
+      <div className="flex items-center gap-2 py-2">
         <ToolbarButton
           isActive={editor.isActive('bold')}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -310,31 +307,18 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      {/* Editor */}
-      <div
-        className={`bg-background border-border min-h-[200px] rounded-lg border p-6 transition-all duration-200 ${
-          isFocused ? 'border-primary/30 shadow-sm' : 'border-border'
-        }`}
-      >
+      {/* Editor - Borderless and Expansive like Substack */}
+      <div className="min-h-[60vh] py-4">
         <EditorContent
           editor={editor}
-          className="prose prose-lg max-w-none focus:outline-none"
+          className="prose prose-xl max-w-none leading-relaxed focus:outline-none"
         />
       </div>
 
-      {/* Stats and Outline */}
-      <div className="text-foreground/60 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-4">
-          <span>{wordCount} words</span>
-          <span>{charCount} characters</span>
-          {readingTime > 0 && <span>{readingTime} min read</span>}
-        </div>
-
-        {outline && outline.length > 0 && (
-          <div className="text-xs">
-            {outline.length} heading{outline.length !== 1 ? 's' : ''}
-          </div>
-        )}
+      {/* Stats - Minimal and Unobtrusive */}
+      <div className="text-foreground/30 flex items-center gap-6 pt-4 text-sm">
+        <span>{wordCount} words</span>
+        {readingTime > 0 && <span>{readingTime} min read</span>}
       </div>
     </div>
   );

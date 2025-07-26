@@ -66,11 +66,11 @@ export default function CreateTextBlockPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background flex min-h-screen flex-col">
       {/* Header */}
       <div className="border-foreground/10 bg-background/80 sticky top-0 z-10 border-b backdrop-blur-sm">
         <div className="px-6 py-4">
-          <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <div className="mx-auto flex max-w-7xl items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
@@ -109,30 +109,27 @@ export default function CreateTextBlockPage() {
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex flex-1 flex-col px-8 py-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-8">
           {error && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
               {error}
             </div>
           )}
 
-          {/* Title Input */}
+          {/* Title Input - Borderless */}
           <div>
-            <label className="text-foreground/80 mb-2 block text-sm font-medium">
-              Block Title (Optional)
-            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Give your text block a title..."
-              className="border-foreground/20 bg-background focus:border-foreground/40 focus:ring-primary/20 w-full rounded-lg border px-4 py-3 text-base focus:ring-2 focus:outline-none"
+              placeholder="Enter your title here..."
+              className="placeholder-foreground/40 text-foreground w-full border-none bg-transparent text-3xl font-bold outline-none focus:outline-none"
             />
           </div>
 
-          {/* Text Editor */}
-          <div>
+          {/* Text Editor - Full Screen */}
+          <div className="flex-1">
             <TextEditor content={content} onChange={setContent} />
           </div>
         </div>
