@@ -14,9 +14,10 @@ import type {
 
 interface BlockRendererProps {
   block: Block;
+  mode?: 'preview' | 'full';
 }
 
-export function BlockRenderer({ block }: BlockRendererProps) {
+export function BlockRenderer({ block, mode = 'full' }: BlockRendererProps) {
   const { block_type, title, content } = block;
 
   try {
@@ -28,7 +29,12 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
       case 'text':
         return (
-          <TextBlockView content={content as TextBlockContent} title={title} />
+          <TextBlockView
+            content={content as TextBlockContent}
+            title={title}
+            mode={mode}
+            blockId={block.id}
+          />
         );
 
       case 'links':

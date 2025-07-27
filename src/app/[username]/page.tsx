@@ -114,7 +114,7 @@ export default async function ProfilePage({
           <div className="space-y-8">
             {blocks.map((block) => (
               <div key={block.id} className="w-full">
-                <BlockRenderer block={block} />
+                <BlockRenderer block={block} mode="preview" />
               </div>
             ))}
           </div>
