@@ -41,8 +41,8 @@ export function BioEditor({ content, onChange }: BioEditorProps) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Use existing uploadAvatar utility
-      const publicUrl = await uploadAvatar(file, user.id);
+      // Use existing uploadAvatar utility with authenticated client
+      const publicUrl = await uploadAvatar(file, user.id, supabase);
 
       // Update content with new avatar URL
       onChange({

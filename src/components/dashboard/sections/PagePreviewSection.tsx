@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import type { UserProfile } from '@/types/user';
 
@@ -34,16 +34,72 @@ export function PagePreviewSection({
   loading,
 }: PagePreviewSectionProps) {
   const [showDrafts, setShowDrafts] = useState(false);
+  const [hiddenBlocks, setHiddenBlocks] = useState<Set<string>>(new Set());
+  const [blockOrder, setBlockOrder] = useState<string[]>(() =>
+    [...publishedBlocks]
+      .sort((a, b) => a.position - b.position)
+      .map((block) => block.id)
+  );
+
   const displayBlocks = showDrafts
     ? [...publishedBlocks, ...draftBlocks]
     : publishedBlocks;
-  const profileCompletion = calculateProfileCompletion(profile, blocks);
   const lastUpdated =
     blocks.length > 0
       ? new Date(
           Math.max(...blocks.map((b) => new Date(b.updated_at).getTime()))
         )
       : null;
+
+  // Update block order when publishedBlocks change
+  React.useEffect(() => {
+    const newOrder = [...publishedBlocks]
+      .sort((a, b) => a.position - b.position)
+      .map((block) => block.id);
+    setBlockOrder(newOrder);
+  }, [publishedBlocks]);
+
+  const toggleBlockVisibility = (blockId: string) => {
+    setHiddenBlocks((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(blockId)) {
+        newSet.delete(blockId);
+      } else {
+        newSet.add(blockId);
+      }
+      return newSet;
+    });
+  };
+
+  const moveBlock = (blockId: string, direction: 'up' | 'down') => {
+    const currentIndex = blockOrder.indexOf(blockId);
+    if (currentIndex === -1) return;
+
+    const newOrder = [...blockOrder];
+    const targetIndex =
+      direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex >= 0 && targetIndex < newOrder.length) {
+      [newOrder[currentIndex], newOrder[targetIndex]] = [
+        newOrder[targetIndex],
+        newOrder[currentIndex],
+      ];
+      setBlockOrder(newOrder);
+    }
+  };
+
+  const shareProfile = async () => {
+    if (!profile?.username) return;
+
+    const profileUrl = `${window.location.origin}/${profile.username}`;
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      alert('Profile link copied to clipboard!');
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      prompt('Copy this link:', profileUrl);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -55,18 +111,87 @@ export function PagePreviewSection({
         </p>
       </div>
 
+      {/* Block Management */}
+      {publishedBlocks.length > 0 && (
+        <div className="bg-background border-foreground/10 rounded-lg border p-6">
+          <h3 className="mb-4 text-lg font-semibold">Block Management</h3>
+          <p className="text-foreground/60 mb-4 text-sm">
+            Reorder and control visibility of your published blocks
+          </p>
+          <div className="space-y-3">
+            {blockOrder.map((blockId, index) => {
+              const block = publishedBlocks.find((b) => b.id === blockId);
+              if (!block) return null;
+
+              const isHidden = hiddenBlocks.has(blockId);
+
+              return (
+                <div
+                  key={blockId}
+                  className="bg-foreground/5 flex items-center gap-3 rounded-lg p-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`truncate text-sm font-medium ${
+                        isHidden
+                          ? 'text-foreground/40 line-through'
+                          : 'text-foreground'
+                      }`}
+                    >
+                      {block.title || `${block.block_type} block`}
+                    </p>
+                    <p className="text-foreground/60 text-xs capitalize">
+                      {block.block_type}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Link
+                      href={`/dashboard/edit-block/${blockId}`}
+                      className="text-foreground/60 hover:text-foreground p-1"
+                      title="Edit block"
+                    >
+                      ✏️
+                    </Link>
+
+                    <button
+                      onClick={() => moveBlock(blockId, 'up')}
+                      disabled={index === 0}
+                      className="text-foreground/60 hover:text-foreground p-1 disabled:cursor-not-allowed disabled:opacity-30"
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+
+                    <button
+                      onClick={() => moveBlock(blockId, 'down')}
+                      disabled={index === blockOrder.length - 1}
+                      className="text-foreground/60 hover:text-foreground p-1 disabled:cursor-not-allowed disabled:opacity-30"
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+
+                    <button
+                      onClick={() => toggleBlockVisibility(blockId)}
+                      className="text-foreground/60 hover:text-foreground p-1"
+                      title={isHidden ? 'Show block' : 'Hide block'}
+                    >
+                      {isHidden ? '👁️‍🗨️' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="bg-background border-foreground/10 rounded-lg border p-4">
           <div className="text-primary text-2xl font-bold">{blocks.length}</div>
           <div className="text-foreground/60 text-sm">Content Blocks</div>
-        </div>
-
-        <div className="bg-background border-foreground/10 rounded-lg border p-4">
-          <div className="text-primary text-2xl font-bold">
-            {profileCompletion}%
-          </div>
-          <div className="text-foreground/60 text-sm">Profile Complete</div>
         </div>
 
         <div className="bg-background border-foreground/10 rounded-lg border p-4">
@@ -117,33 +242,57 @@ export function PagePreviewSection({
                 </div>
               ) : displayBlocks.length > 0 ? (
                 <div className="space-y-2">
-                  {displayBlocks.slice(0, 3).map((block) => (
-                    <div
-                      key={block.id}
-                      className="bg-foreground/5 relative rounded p-2"
-                    >
-                      {!block.is_published && (
-                        <div className="absolute top-1 right-1">
-                          <span className="rounded bg-orange-100 px-1 py-0.5 text-xs text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                            Draft
-                          </span>
+                  {(showDrafts
+                    ? displayBlocks
+                    : blockOrder
+                        .map((id) =>
+                          publishedBlocks.find((block) => block.id === id)
+                        )
+                        .filter(
+                          (block): block is Block =>
+                            block !== undefined && !hiddenBlocks.has(block.id)
+                        )
+                  )
+                    .slice(0, 3)
+                    .map((block) => (
+                      <div
+                        key={block.id}
+                        className="bg-foreground/5 relative rounded p-2"
+                      >
+                        {!block.is_published && (
+                          <div className="absolute top-1 right-1">
+                            <span className="rounded bg-orange-100 px-1 py-0.5 text-xs text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                              Draft
+                            </span>
+                          </div>
+                        )}
+                        <div className="text-foreground/70 mb-1 text-xs font-medium">
+                          {block.block_type.charAt(0).toUpperCase() +
+                            block.block_type.slice(1)}{' '}
+                          Block
                         </div>
-                      )}
-                      <div className="text-foreground/70 mb-1 text-xs font-medium">
-                        {block.block_type.charAt(0).toUpperCase() +
-                          block.block_type.slice(1)}{' '}
-                        Block
+                        <div className="text-foreground/50 line-clamp-2 text-xs">
+                          {block.title || 'Content preview...'}
+                        </div>
                       </div>
-                      <div className="text-foreground/50 line-clamp-2 text-xs">
-                        {block.title || 'Content preview...'}
-                      </div>
-                    </div>
-                  ))}
-                  {displayBlocks.length > 3 && (
-                    <div className="text-foreground/40 py-2 text-center text-xs">
-                      +{displayBlocks.length - 3} more blocks
-                    </div>
-                  )}
+                    ))}
+                  {(() => {
+                    const visibleCount = showDrafts
+                      ? displayBlocks.length
+                      : blockOrder.filter((id) => !hiddenBlocks.has(id)).length;
+                    return (
+                      visibleCount > 3 && (
+                        <div className="text-foreground/40 py-2 text-center text-xs">
+                          +{visibleCount - 3} more blocks
+                          {!showDrafts && hiddenBlocks.size > 0 && (
+                            <span className="text-foreground/30 ml-1">
+                              ({hiddenBlocks.size} hidden)
+                            </span>
+                          )}
+                        </div>
+                      )
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-foreground/40 py-8 text-center">
@@ -165,23 +314,23 @@ export function PagePreviewSection({
 
             {/* Quick Actions */}
             <div className="flex gap-3">
+              <button
+                onClick={shareProfile}
+                className="bg-foreground/10 text-foreground hover:bg-foreground/20 flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <span>📤</span>
+                <span>Share</span>
+              </button>
+
               <Link
                 href={`/${profile.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors"
               >
-                <span>View Public Profile</span>
-                <span className="text-xs">↗</span>
+                <span>🔗</span>
+                <span>View Live</span>
               </Link>
-
-              <button
-                disabled
-                className="bg-foreground/5 text-foreground/40 cursor-not-allowed rounded-md px-4 py-2 text-sm font-medium"
-                title="Coming soon"
-              >
-                Share Profile
-              </button>
             </div>
 
             {/* Last Updated */}
@@ -206,73 +355,6 @@ export function PagePreviewSection({
           </div>
         )}
       </div>
-
-      {/* Profile Completion Checklist */}
-      <div className="bg-background border-foreground/10 rounded-lg border p-4">
-        <h4 className="mb-3 font-semibold">Profile Checklist</h4>
-        <div className="space-y-2">
-          <ChecklistItem completed={!!profile?.username} text="Username set" />
-          <ChecklistItem
-            completed={!!profile?.display_name}
-            text="Display name added"
-          />
-          <ChecklistItem
-            completed={blocks.some((b) => b.block_type === 'bio')}
-            text="Bio block created"
-          />
-          <ChecklistItem
-            completed={blocks.length >= 2}
-            text="Multiple content blocks"
-          />
-        </div>
-      </div>
     </div>
   );
-}
-
-function ChecklistItem({
-  completed,
-  text,
-}: {
-  completed: boolean;
-  text: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`flex h-4 w-4 items-center justify-center rounded-full text-xs ${
-          completed
-            ? 'bg-green-500 text-white'
-            : 'bg-foreground/10 text-foreground/40'
-        }`}
-      >
-        {completed ? '✓' : '○'}
-      </div>
-      <span
-        className={`text-sm ${
-          completed ? 'text-foreground' : 'text-foreground/60'
-        }`}
-      >
-        {text}
-      </span>
-    </div>
-  );
-}
-
-function calculateProfileCompletion(
-  profile: UserProfile | null,
-  blocks: Block[]
-): number {
-  if (!profile) return 0;
-
-  let score = 0;
-  const maxScore = 5;
-
-  if (profile.username) score += 1;
-  if (profile.display_name) score += 1;
-  if (blocks.some((b) => b.block_type === 'bio')) score += 1;
-  if (blocks.length >= 2) score += 1;
-  if (blocks.length >= 4) score += 1;
-
-  return Math.round((score / maxScore) * 100);
 }
