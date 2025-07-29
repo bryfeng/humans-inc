@@ -57,24 +57,11 @@ export function PagePreviewSection({
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [isSavingLayout, setIsSavingLayout] = useState(false);
 
-  // Track original state to detect changes
-  const [originalHiddenBlocks] = useState<Set<string>>(() => {
-    const hidden = new Set<string>();
-    publishedBlocks.forEach((block) => {
-      if (block.is_visible === false) {
-        hidden.add(block.id);
-      }
-    });
-    return hidden;
-  });
-  const [originalBlockOrder] = useState<string[]>(() =>
-    [...publishedBlocks]
-      .sort(
-        (a, b) =>
-          (a.display_order ?? a.position) - (b.display_order ?? b.position)
-      )
-      .map((block) => block.id)
+  // Track original state to detect changes - initialize empty, will be set from database
+  const [originalHiddenBlocks, setOriginalHiddenBlocks] = useState<Set<string>>(
+    new Set()
   );
+  const [originalBlockOrder, setOriginalBlockOrder] = useState<string[]>([]);
 
   const displayBlocks = showDrafts
     ? [...publishedBlocks, ...draftBlocks]
@@ -86,12 +73,34 @@ export function PagePreviewSection({
         )
       : null;
 
-  // Update block order when publishedBlocks change
+  // Initialize state from database when publishedBlocks change
   React.useEffect(() => {
-    const newOrder = [...publishedBlocks]
-      .sort((a, b) => a.position - b.position)
+    if (publishedBlocks.length === 0) return;
+
+    // Initialize hidden blocks from is_visible field
+    const hiddenFromDb = new Set<string>();
+    publishedBlocks.forEach((block) => {
+      if (block.is_visible === false) {
+        hiddenFromDb.add(block.id);
+      }
+    });
+    setHiddenBlocks(hiddenFromDb);
+    setOriginalHiddenBlocks(new Set(hiddenFromDb)); // Update original state too
+
+    // Initialize block order from display_order or position
+    const orderFromDb = [...publishedBlocks]
+      .sort((a, b) => {
+        const orderA = a.display_order ?? a.position;
+        const orderB = b.display_order ?? b.position;
+        return orderA - orderB;
+      })
       .map((block) => block.id);
-    setBlockOrder(newOrder);
+
+    setBlockOrder(orderFromDb);
+    setOriginalBlockOrder([...orderFromDb]); // Update original state too
+
+    // Reset pending changes since we just loaded from database
+    setHasPendingChanges(false);
   }, [publishedBlocks]);
 
   // Detect pending changes

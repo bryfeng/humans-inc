@@ -177,8 +177,9 @@ export default function DashboardPage() {
         supabase.from('profiles').select('*').eq('id', authUser.id).single(),
         supabase
           .from('blocks')
-          .select('*')
+          .select('*, is_visible, display_order')
           .eq('user_id', authUser.id)
+          .order('display_order', { ascending: true, nullsFirst: false })
           .order('position', { ascending: true }),
       ]);
 
