@@ -11,6 +11,8 @@ import {
   PagePreviewSection,
   InboxSection,
   DraftsSection,
+  ManageBlocksSection,
+  CollectionsSection,
 } from '@/components/dashboard/sections';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import {
@@ -44,7 +46,16 @@ import type {
   ContentListBlockContent,
 } from '@/features/blocks/types';
 import type { UserProfile } from '@/types/user';
+import type { Collection } from '@/types';
 import { updateBlockLayout } from '@/features/blocks/actions';
+import {
+  getUserCollections,
+  createCollection,
+  updateCollection,
+  deleteCollection,
+  moveBlockToCollection,
+  getBlocksByCollection,
+} from '@/features/collections/actions';
 
 // Define local Block type to avoid boundary violation
 interface Block {
@@ -151,6 +162,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [draftBlocks, setDraftBlocks] = useState<Block[]>([]);
   const [publishedBlocks, setPublishedBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,12 +184,12 @@ export default function DashboardPage() {
 
       setUser(authUser);
 
-      // Fetch profile and blocks
+      // Fetch profile, blocks, and collections
       const [profileResult, blocksResult] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', authUser.id).single(),
         supabase
           .from('blocks')
-          .select('*, is_visible, display_order')
+          .select('*, is_visible, display_order, collection_id')
           .eq('user_id', authUser.id)
           .order('display_order', { ascending: true, nullsFirst: false })
           .order('position', { ascending: true }),
@@ -185,6 +197,16 @@ export default function DashboardPage() {
 
       setProfile(profileResult.data || null);
       setBlocks(blocksResult.data || []);
+
+      // Fetch collections
+      try {
+        const collectionsData = await getUserCollections(authUser.id);
+        setCollections(collectionsData);
+      } catch (error) {
+        console.error('Error loading collections:', error);
+        setCollections([]);
+      }
+
       setLoading(false);
 
       // Load draft and published blocks separately
@@ -229,6 +251,147 @@ export default function DashboardPage() {
     setDraftBlocks(drafts);
   };
 
+  // Collection management functions
+  const handleCreateCollection = async (name: string, description?: string) => {
+    if (!user) return;
+
+    try {
+      await createCollection({
+        user_id: user.id,
+        name,
+        description,
+        is_public: false,
+      });
+
+      // Refresh collections
+      const collectionsData = await getUserCollections(user.id);
+      setCollections(collectionsData);
+    } catch (error) {
+      console.error('Error creating collection:', error);
+      throw error;
+    }
+  };
+
+  const handleUpdateCollection = async (
+    id: string,
+    name: string,
+    description?: string,
+    isPublic?: boolean
+  ) => {
+    try {
+      await updateCollection({
+        id,
+        name,
+        description,
+        is_public: isPublic,
+      });
+
+      // Refresh collections
+      const collectionsData = await getUserCollections(user?.id || '');
+      setCollections(collectionsData);
+    } catch (error) {
+      console.error('Error updating collection:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteCollection = async (id: string) => {
+    try {
+      await deleteCollection(id);
+
+      // Refresh collections and blocks
+      if (user) {
+        const [collectionsData, blocksResult] = await Promise.all([
+          getUserCollections(user.id),
+          createClient()
+            .from('blocks')
+            .select('*, is_visible, display_order, collection_id')
+            .eq('user_id', user.id)
+            .order('display_order', { ascending: true, nullsFirst: false })
+            .order('position', { ascending: true }),
+        ]);
+        setCollections(collectionsData);
+        setBlocks(blocksResult.data || []);
+      }
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+      throw error;
+    }
+  };
+
+  const handleMoveToCollection = async (
+    blockId: string,
+    collectionId: string | null
+  ) => {
+    try {
+      await moveBlockToCollection(blockId, collectionId);
+
+      // Refresh blocks
+      if (user) {
+        const blocksResult = await createClient()
+          .from('blocks')
+          .select('*, is_visible, display_order, collection_id')
+          .eq('user_id', user.id)
+          .order('display_order', { ascending: true, nullsFirst: false })
+          .order('position', { ascending: true });
+        setBlocks(blocksResult.data || []);
+      }
+    } catch (error) {
+      console.error('Error moving block to collection:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteBlock = async (blockId: string) => {
+    try {
+      await deleteBlock(blockId);
+
+      // Refresh blocks and drafts
+      if (user) {
+        const [blocksResult, drafts] = await Promise.all([
+          createClient()
+            .from('blocks')
+            .select('*, is_visible, display_order, collection_id')
+            .eq('user_id', user.id)
+            .order('display_order', { ascending: true, nullsFirst: false })
+            .order('position', { ascending: true }),
+          getDraftBlocks(user.id),
+        ]);
+        setBlocks(blocksResult.data || []);
+        setDraftBlocks(drafts);
+      }
+    } catch (error) {
+      console.error('Error deleting block:', error);
+      throw error;
+    }
+  };
+
+  const handlePublishBlock = async (blockId: string) => {
+    try {
+      await publishBlock(blockId);
+
+      // Refresh blocks and drafts
+      if (user) {
+        const [blocksResult, drafts, published] = await Promise.all([
+          createClient()
+            .from('blocks')
+            .select('*, is_visible, display_order, collection_id')
+            .eq('user_id', user.id)
+            .order('display_order', { ascending: true, nullsFirst: false })
+            .order('position', { ascending: true }),
+          getDraftBlocks(user.id),
+          getPublishedBlocks(user.id),
+        ]);
+        setBlocks(blocksResult.data || []);
+        setDraftBlocks(drafts);
+        setPublishedBlocks(published);
+      }
+    } catch (error) {
+      console.error('Error publishing block:', error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return (
       <div className="from-background via-background to-foreground/5 flex min-h-screen items-center justify-center bg-gradient-to-br">
@@ -264,6 +427,30 @@ export default function DashboardPage() {
             loading={draftsLoading}
             onPublish={handlePublish}
             onDelete={handleDelete}
+          />
+        );
+      case 'manage':
+        return (
+          <ManageBlocksSection
+            profile={profile}
+            blocks={blocks}
+            collections={collections}
+            loading={loading}
+            onMoveToCollection={handleMoveToCollection}
+            onDeleteBlock={handleDeleteBlock}
+            onPublishBlock={handlePublishBlock}
+          />
+        );
+      case 'collections':
+        return (
+          <CollectionsSection
+            profile={profile}
+            collections={collections}
+            blocks={blocks}
+            loading={loading}
+            onCreateCollection={handleCreateCollection}
+            onUpdateCollection={handleUpdateCollection}
+            onDeleteCollection={handleDeleteCollection}
           />
         );
       case 'create':

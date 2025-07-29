@@ -11,6 +11,7 @@ export interface Block {
   is_published: boolean;
   is_visible?: boolean; // Controls visibility on public page (default: true)
   display_order?: number; // Custom ordering for public display (separate from position)
+  collection_id?: string; // Reference to collection (nullable)
   created_at: string;
   updated_at: string;
 }
@@ -88,6 +89,7 @@ export interface CreateBlockData {
   content: Record<string, unknown>;
   config?: BlockConfig;
   is_published?: boolean;
+  collection_id?: string; // Optional collection assignment
 }
 
 // For updating existing blocks
@@ -101,6 +103,7 @@ export interface UpdateBlockData {
   is_published?: boolean;
   is_visible?: boolean;
   display_order?: number;
+  collection_id?: string; // Allow collection updates
 }
 
 // For batch layout updates

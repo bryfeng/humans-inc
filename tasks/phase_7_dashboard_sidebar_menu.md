@@ -102,7 +102,7 @@ This phase focuses on transforming the current dashboard layout into a modern si
 
 - **Tasks**:
 
-  - [ ] Add `is_published` field to blocks table schema
+  - [x] Add `is_published` field to blocks table schema
   - [ ] Update block types to include publication status
   - [ ] Create draft-specific server actions (`getDraftBlocks`, `publishBlock`, etc.)
   - [x] Create `DraftsSection` component

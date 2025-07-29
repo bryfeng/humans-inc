@@ -1,12 +1,16 @@
-1. slugs
+1. slugs - done
 
-2. doing content folders
+2. doing content folders (collections)
 
 3. grid system to make bio more flexible
 
 4. multimedia player
 
 5. content creation wizard
+
+6. subscription gated content
+
+7. AI driven content curation
 
 writing + illustration is cool, need a top bar with illustration insert that generates from midjourney
 content ids

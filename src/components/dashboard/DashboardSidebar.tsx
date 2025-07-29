@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 
-export type DashboardSection = 'preview' | 'inbox' | 'drafts' | 'create';
+export type DashboardSection =
+  | 'preview'
+  | 'manage'
+  | 'collections'
+  | 'create'
+  | 'drafts'
+  | 'inbox';
 
 interface DashboardSidebarProps {
   activeSection: DashboardSection;
@@ -24,10 +30,22 @@ const sidebarItems: SidebarItem[] = [
     description: 'Preview your public page',
   },
   {
-    id: 'inbox',
-    label: 'Inbox',
-    icon: '💬',
-    description: 'Messages from visitors',
+    id: 'manage',
+    label: 'Manage Blocks',
+    icon: '�',
+    description: 'Organize and manage your content blocks',
+  },
+  {
+    id: 'collections',
+    label: 'Collections',
+    icon: '�️',
+    description: 'Group your content into collections',
+  },
+  {
+    id: 'create',
+    label: 'Create',
+    icon: '✨',
+    description: 'Add new content blocks',
   },
   {
     id: 'drafts',
@@ -36,10 +54,10 @@ const sidebarItems: SidebarItem[] = [
     description: 'Unpublished content',
   },
   {
-    id: 'create',
-    label: 'Create',
-    icon: '✨',
-    description: 'Add new content blocks',
+    id: 'inbox',
+    label: 'Inbox',
+    icon: '💬',
+    description: 'Messages from visitors',
   },
 ];
 
