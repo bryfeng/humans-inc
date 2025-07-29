@@ -27,6 +27,7 @@ import {
   BlockTypeSelectorOverlay,
   CreateBlockButton,
 } from '@/features/blocks/components/BlockTypeSelectorOverlay';
+import { BioBlockCreationOverlay } from '@/features/blocks/components/BioBlockCreationOverlay';
 import {
   SmartPublishControls,
   SaveFeedback,
@@ -78,14 +79,17 @@ function CreateSectionComponent({
   currentBlockCount,
   draftBlocks,
   publishedBlocks,
+  onDataRefresh,
 }: {
   userId: string;
   profile: UserProfile | null;
   currentBlockCount: number;
   draftBlocks: Block[];
   publishedBlocks: Block[];
+  onDataRefresh: () => void;
 }) {
   const [showBlockSelector, setShowBlockSelector] = useState(false);
+  const [showBioCreator, setShowBioCreator] = useState(false);
   const [selectedBlockType, setSelectedBlockType] = useState<BlockType | null>(
     null
   );
@@ -99,6 +103,21 @@ function CreateSectionComponent({
   }>({ type: null, message: '' });
   const [recentlyUsed, setRecentlyUsed] = useState<BlockType[]>([]);
   const router = useRouter();
+
+  const handleBlockTypeSelect = (blockType: BlockType) => {
+    setShowBlockSelector(false);
+
+    if (blockType === 'bio') {
+      setShowBioCreator(true);
+    } else {
+      // Route to dedicated creation pages for other block types
+      router.push(`/dashboard/create/${blockType.replace('_', '-')}`);
+    }
+  };
+
+  const handleBioCreationSuccess = () => {
+    onDataRefresh();
+  };
 
   if (!profile || !profile.username) {
     return (
@@ -148,9 +167,15 @@ function CreateSectionComponent({
       <BlockTypeSelectorOverlay
         isOpen={showBlockSelector}
         onClose={() => setShowBlockSelector(false)}
-        onSelectType={() => {}} // Simplified for now
+        onSelectType={handleBlockTypeSelect}
         recentlyUsed={recentlyUsed}
         existingBlocks={[...draftBlocks, ...publishedBlocks]}
+      />
+
+      <BioBlockCreationOverlay
+        isOpen={showBioCreator}
+        onClose={() => setShowBioCreator(false)}
+        onSuccess={handleBioCreationSuccess}
       />
     </div>
   );
@@ -461,6 +486,30 @@ export default function DashboardPage() {
             currentBlockCount={blocks.length}
             draftBlocks={draftBlocks}
             publishedBlocks={publishedBlocks}
+            onDataRefresh={async () => {
+              if (user) {
+                try {
+                  const [drafts, published, blocksResult] = await Promise.all([
+                    getDraftBlocks(user.id),
+                    getPublishedBlocks(user.id),
+                    createClient()
+                      .from('blocks')
+                      .select('*, is_visible, display_order, collection_id')
+                      .eq('user_id', user.id)
+                      .order('display_order', {
+                        ascending: true,
+                        nullsFirst: false,
+                      })
+                      .order('position', { ascending: true }),
+                  ]);
+                  setDraftBlocks(drafts);
+                  setPublishedBlocks(published);
+                  setBlocks(blocksResult.data || []);
+                } catch (error) {
+                  console.error('Error refreshing data:', error);
+                }
+              }
+            }}
           />
         );
       default:

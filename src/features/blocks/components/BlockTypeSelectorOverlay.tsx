@@ -107,9 +107,8 @@ export function BlockTypeSelectorOverlay({
       }
     }
 
-    // Route to dedicated creation pages
-    onClose();
-    router.push(`/dashboard/create/${blockType.replace('_', '-')}`);
+    // Handle bio creation through callback
+    onSelectType(blockType);
   };
 
   return (
