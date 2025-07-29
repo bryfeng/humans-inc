@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { BioEditor } from './BioEditor';
-import { SlugInput } from './SlugInput';
 import { createBlockWithSlug } from '../actions';
 import type { BioBlockContent } from '../types';
 
@@ -19,7 +18,6 @@ export function BioBlockCreationOverlay({
   onSuccess,
 }: BioBlockCreationOverlayProps) {
   const [title, setTitle] = useState('About Me');
-  const [slug, setSlug] = useState('');
   const [content, setContent] = useState<BioBlockContent>({
     display_name: '',
     tagline: '',
@@ -54,18 +52,17 @@ export function BioBlockCreationOverlay({
         position: 0,
         block_type: 'bio' as const,
         title: title || content.display_name || 'Bio Block',
-        slug: slug.trim() || undefined,
+        slug: undefined, // Bio blocks should never have slugs
         content,
         config: {},
         is_published: publish,
-        generateSlug: !slug.trim() && !!title.trim(),
+        generateSlug: false, // Never auto-generate slugs for bio blocks
       };
 
       await createBlockWithSlug(blockData);
 
       // Reset form
       setTitle('About Me');
-      setSlug('');
       setContent({
         display_name: '',
         tagline: '',
@@ -131,16 +128,6 @@ export function BioBlockCreationOverlay({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="About Me"
               className="input-primary"
-            />
-          </div>
-
-          {/* Slug Input */}
-          <div className="mb-6">
-            <SlugInput
-              slug={slug}
-              title={title}
-              onChange={setSlug}
-              disabled={saving}
             />
           </div>
 
