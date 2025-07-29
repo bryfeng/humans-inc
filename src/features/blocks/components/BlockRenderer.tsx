@@ -34,6 +34,7 @@ export function BlockRenderer({ block, mode = 'full' }: BlockRendererProps) {
             title={title}
             mode={mode}
             blockId={block.id}
+            block={block}
           />
         );
 

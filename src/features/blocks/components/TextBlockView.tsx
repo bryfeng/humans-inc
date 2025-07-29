@@ -3,13 +3,14 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { TextBlockContent } from '../types';
+import type { TextBlockContent, Block } from '../types';
 
 interface TextBlockViewProps {
   content: TextBlockContent;
   title?: string;
   mode?: 'preview' | 'full';
   blockId?: string;
+  block?: Block; // Full block object for slug access
 }
 
 // Simple markdown parser for basic formatting
@@ -35,6 +36,7 @@ export function TextBlockView({
   title,
   mode = 'full',
   blockId,
+  block,
 }: TextBlockViewProps) {
   const pathname = usePathname();
   const {
@@ -109,7 +111,9 @@ export function TextBlockView({
   const getBlockLink = () => {
     const pathParts = pathname.split('/');
     const username = pathParts[1];
-    return `/${username}/${blockId}`;
+    // Use slug if available, otherwise fall back to blockId
+    const identifier = block?.slug || blockId;
+    return `/${username}/${identifier}`;
   };
 
   // Don't render if no content

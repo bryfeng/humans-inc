@@ -10,6 +10,7 @@ import type {
 } from '../types';
 import { updateBlock } from '../actions';
 import { BioEditor, TextEditor, LinksEditor, ContentListEditor } from './index';
+import { SlugInput } from './SlugInput';
 
 interface BlockEditorProps {
   block: Block;
@@ -19,6 +20,7 @@ interface BlockEditorProps {
 
 export function BlockEditor({ block, onSave, onCancel }: BlockEditorProps) {
   const [title, setTitle] = useState(block.title || '');
+  const [slug, setSlug] = useState(block.slug || '');
   const [content, setContent] = useState(block.content);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -28,6 +30,7 @@ export function BlockEditor({ block, onSave, onCancel }: BlockEditorProps) {
       await updateBlock({
         id: block.id,
         title: title.trim() || undefined,
+        slug: slug.trim() || undefined,
         content,
       });
       onSave();
@@ -99,6 +102,18 @@ export function BlockEditor({ block, onSave, onCancel }: BlockEditorProps) {
           className="input-primary"
         />
       </div>
+
+      {/* Slug editor - only for text blocks */}
+      {block.block_type === 'text' && (
+        <div className="animate-slide-up" style={{ animationDelay: '0.05s' }}>
+          <SlugInput
+            slug={slug}
+            title={title}
+            onChange={setSlug}
+            disabled={isSaving}
+          />
+        </div>
+      )}
 
       {/* Content editor */}
       <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>

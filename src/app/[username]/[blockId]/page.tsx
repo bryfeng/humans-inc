@@ -1,16 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { BlockRenderer } from '@/features/blocks/components';
 import {
   getPublicUserBlocks,
   getPublicProfile,
+  getBlockBySlugOrId,
 } from '@/features/blocks/actions';
 import type {
   BioBlockContent,
   TextBlockContent,
   Block,
 } from '@/features/blocks/types';
+import { isUUID } from '@/utils/slug';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -33,8 +35,7 @@ export async function generateMetadata({
     };
   }
 
-  const blocks = await getPublicUserBlocks(profile.id);
-  const block = blocks.find((b) => b.id === blockId);
+  const block = await getBlockBySlugOrId(profile.id, blockId);
 
   if (!block || block.block_type !== 'text') {
     return {
@@ -57,7 +58,9 @@ export async function generateMetadata({
       title: `${title} | ${authorName}`,
       description,
       type: 'article',
-      url: `/${username}/${blockId}`,
+      url: block.slug
+        ? `/${username}/${block.slug}`
+        : `/${username}/${blockId}`,
     },
     twitter: {
       card: 'summary',
@@ -127,14 +130,21 @@ export default async function BlockPage({
     notFound();
   }
 
-  // Get user's blocks
-  const blocks = await getPublicUserBlocks(profile.id);
-  const block = blocks.find((b) => b.id === blockId);
+  // Get block by slug or ID
+  const block = await getBlockBySlugOrId(profile.id, blockId);
 
   // Only allow text blocks on individual pages
   if (!block || block.block_type !== 'text') {
     notFound();
   }
+
+  // If accessing by UUID but block has a slug, redirect to slug URL
+  if (isUUID(blockId) && block.slug) {
+    redirect(`/${username}/${block.slug}`);
+  }
+
+  // Get user's blocks for bio block
+  const blocks = await getPublicUserBlocks(profile.id);
 
   // Get bio block for author info
   const bioBlock = blocks.find((b) => b.block_type === 'bio');

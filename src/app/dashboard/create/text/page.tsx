@@ -4,15 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { TextEditor } from '@/features/blocks/components';
-import {
-  createAndSaveBlock,
-  createAndPublishBlock,
-} from '@/features/blocks/actions';
+import { SlugInput } from '@/features/blocks/components/SlugInput';
+import { createBlockWithSlug } from '@/features/blocks/actions';
 import type { TextBlockContent } from '@/features/blocks/types';
 
 export default function CreateTextBlockPage() {
   const router = useRouter();
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [content, setContent] = useState<TextBlockContent>({
     text: '',
     formatting: 'rich',
@@ -46,15 +45,18 @@ export default function CreateTextBlockPage() {
         position: 0,
         block_type: 'text' as const,
         title: title || 'Untitled Text Block',
+        slug: slug.trim() || undefined,
         content,
         config: {},
+        is_published: publish,
+        generateSlug: !slug.trim() && !!title.trim(), // Auto-generate if no manual slug but has title
       };
 
+      await createBlockWithSlug(blockData);
+
       if (publish) {
-        await createAndPublishBlock(blockData);
         router.push('/dashboard?published=true');
       } else {
-        await createAndSaveBlock(blockData);
         router.push('/dashboard?saved=true');
       }
     } catch (error) {
@@ -125,6 +127,16 @@ export default function CreateTextBlockPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter your title here..."
               className="placeholder-foreground/40 text-foreground w-full border-none bg-transparent text-3xl font-bold outline-none focus:outline-none"
+            />
+          </div>
+
+          {/* Slug Input */}
+          <div className="border-foreground/10 border-t pt-6">
+            <SlugInput
+              slug={slug}
+              title={title}
+              onChange={setSlug}
+              disabled={saving}
             />
           </div>
 

@@ -5,6 +5,7 @@ export interface Block {
   position: number;
   block_type: string;
   title?: string;
+  slug?: string; // URL-friendly slug for SEO-friendly URLs
   content: Record<string, unknown>;
   config: Record<string, unknown>;
   is_published: boolean;
@@ -83,6 +84,7 @@ export interface CreateBlockData {
   position: number;
   block_type: BlockType;
   title?: string;
+  slug?: string; // Optional slug for new blocks
   content: Record<string, unknown>;
   config?: BlockConfig;
   is_published?: boolean;
@@ -92,6 +94,7 @@ export interface CreateBlockData {
 export interface UpdateBlockData {
   id: string;
   title?: string;
+  slug?: string; // Allow slug updates
   content?: Record<string, unknown>;
   config?: BlockConfig;
   position?: number;

@@ -9,6 +9,12 @@ import type {
   Block,
   BlockLayoutUpdate,
 } from '../types';
+import {
+  generateAvailableSlug,
+  isSlugAvailable,
+  validateSlug,
+  isUUID,
+} from '@/utils/slug';
 
 export async function createBlock(data: CreateBlockData) {
   const supabase = await createClient();
@@ -90,11 +96,47 @@ export async function updateBlock(data: UpdateBlockData) {
     );
   }
 
+  // Handle slug validation if being updated
+  if (data.slug !== undefined) {
+    if (data.slug && !validateSlug(data.slug)) {
+      throw new Error(
+        'Invalid slug format. Use only lowercase letters, numbers, and hyphens.'
+      );
+    }
+
+    // Check slug availability if changing slug
+    if (data.slug) {
+      const { data: currentBlock, error: currentError } = await supabase
+        .from('blocks')
+        .select('slug')
+        .eq('id', data.id)
+        .single();
+
+      if (currentError) {
+        console.error('Fetch current block error:', currentError.message);
+        throw new Error(
+          `Failed to fetch current block: ${currentError.message}`
+        );
+      }
+
+      // Only check availability if slug is actually changing
+      if (currentBlock.slug !== data.slug) {
+        const isAvailable = await isSlugAvailable(user.id, data.slug);
+        if (!isAvailable) {
+          throw new Error(
+            'Slug is already in use. Please choose a different slug.'
+          );
+        }
+      }
+    }
+  }
+
   // Build update object with only provided fields
   const updateData: Partial<
     Pick<
       Block,
       | 'title'
+      | 'slug'
       | 'content'
       | 'config'
       | 'position'
@@ -103,6 +145,7 @@ export async function updateBlock(data: UpdateBlockData) {
     >
   > = {};
   if (data.title !== undefined) updateData.title = data.title;
+  if (data.slug !== undefined) updateData.slug = data.slug;
   if (data.content !== undefined) updateData.content = data.content;
   if (data.config !== undefined) updateData.config = data.config;
   if (data.position !== undefined) updateData.position = data.position;
@@ -685,6 +728,218 @@ export async function autoSaveBlock(
   }
 
   // Don't revalidate for auto-save to avoid excessive re-renders
+}
+
+// Slug-specific functions
+
+// Get block by slug (for public access)
+export async function getBlockBySlug(
+  userId: string,
+  slug: string
+): Promise<Block | null> {
+  const supabase = await createClient();
+
+  const { data: block, error } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single();
+
+  if (error) {
+    console.error('Fetch block by slug error:', error.message);
+    return null;
+  }
+
+  return block;
+}
+
+// Get block by slug or ID (for backwards compatibility)
+export async function getBlockBySlugOrId(
+  userId: string,
+  slugOrId: string
+): Promise<Block | null> {
+  const supabase = await createClient();
+
+  // First try to get by slug if it's not a UUID
+  if (!isUUID(slugOrId)) {
+    const blockBySlug = await getBlockBySlug(userId, slugOrId);
+    if (blockBySlug) return blockBySlug;
+  }
+
+  // Fallback to ID lookup
+  const { data: block, error } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', slugOrId)
+    .eq('is_published', true)
+    .single();
+
+  if (error) {
+    console.error('Fetch block by ID error:', error.message);
+    return null;
+  }
+
+  return block;
+}
+
+// Validate and update block slug
+export async function updateBlockSlug(
+  blockId: string,
+  newSlug: string
+): Promise<boolean> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Validate slug format
+  if (!validateSlug(newSlug)) {
+    throw new Error(
+      'Invalid slug format. Use only lowercase letters, numbers, and hyphens.'
+    );
+  }
+
+  // First check if the block belongs to the authenticated user
+  const { data: existingBlock, error: fetchError } = await supabase
+    .from('blocks')
+    .select('user_id, slug')
+    .eq('id', blockId)
+    .single();
+
+  if (fetchError) {
+    console.error('Fetch block error:', fetchError.message);
+    throw new Error(`Failed to fetch block: ${fetchError.message}`);
+  }
+
+  if (existingBlock.user_id !== user.id) {
+    throw new Error(
+      'Unauthorized: Cannot update slug of block belonging to another user'
+    );
+  }
+
+  // Check if slug is available (ignore current block's slug)
+  if (existingBlock.slug !== newSlug) {
+    const isAvailable = await isSlugAvailable(user.id, newSlug);
+    if (!isAvailable) {
+      throw new Error(
+        'Slug is already in use. Please choose a different slug.'
+      );
+    }
+  }
+
+  // Update the slug
+  const { error } = await supabase
+    .from('blocks')
+    .update({
+      slug: newSlug,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', blockId);
+
+  if (error) {
+    console.error('Update block slug error:', error.message);
+    throw new Error(`Failed to update slug: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+
+  // Also revalidate the public profile page
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.username) {
+    revalidatePath(`/${profile.username}`);
+  }
+
+  return true;
+}
+
+// Enhanced create function with slug support
+export async function createBlockWithSlug(
+  data: CreateBlockData & { generateSlug?: boolean }
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Ensure the user_id matches the authenticated user
+  if (data.user_id !== user.id) {
+    throw new Error('Unauthorized: Cannot create block for another user');
+  }
+
+  // Check that user has a profile record
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile || !profile.username) {
+    redirect('/dashboard?setup=required');
+  }
+
+  // Generate slug if requested and title is provided
+  let finalSlug = data.slug;
+  if (data.generateSlug && data.title && !finalSlug) {
+    finalSlug = await generateAvailableSlug(user.id, data.title);
+  }
+
+  // Validate provided slug
+  if (finalSlug && !validateSlug(finalSlug)) {
+    throw new Error(
+      'Invalid slug format. Use only lowercase letters, numbers, and hyphens.'
+    );
+  }
+
+  // Check slug availability if provided
+  if (finalSlug) {
+    const isAvailable = await isSlugAvailable(user.id, finalSlug);
+    if (!isAvailable) {
+      throw new Error(
+        'Slug is already in use. Please choose a different slug.'
+      );
+    }
+  }
+
+  const { data: createdBlock, error } = await supabase
+    .from('blocks')
+    .insert({
+      user_id: data.user_id,
+      position: data.position,
+      block_type: data.block_type,
+      title: data.title,
+      slug: finalSlug,
+      content: data.content,
+      config: data.config || {},
+      is_published: data.is_published ?? false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Create block with slug error:', error.message);
+    throw new Error(`Failed to create block: ${error.message}`);
+  }
+
+  revalidatePath('/dashboard');
+  return createdBlock;
 }
 
 // Update block layout (visibility and ordering)
