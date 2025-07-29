@@ -9,6 +9,7 @@ export { TextEditor } from './TextEditor';
 export { RichTextEditor } from './RichTextEditor';
 export { LinksEditor } from './LinksEditor';
 export { ContentListEditor } from './ContentListEditor';
+export { SlugInput } from './SlugInput';
 
 // Visitor view components
 export { BioBlockView } from './BioBlockView';

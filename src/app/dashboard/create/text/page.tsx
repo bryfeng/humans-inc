@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { TextEditor } from '@/features/blocks/components';
-import { SlugInput } from '@/features/blocks/components/SlugInput';
+import { SlugInput } from '@/features/blocks/components';
 import { createBlockWithSlug } from '@/features/blocks/actions';
 import type { TextBlockContent } from '@/features/blocks/types';
 

@@ -89,17 +89,14 @@ export function BlockEditor({ block, onSave, onCancel }: BlockEditorProps) {
         </h3>
       </div>
 
-      {/* Title editor */}
+      {/* Title editor - large borderless style like create page */}
       <div className="animate-slide-up">
-        <label className="text-foreground/80 mb-2 block text-sm font-medium">
-          Block Title (optional)
-        </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter a title for this block..."
-          className="input-primary"
+          placeholder="Enter your title here..."
+          className="placeholder-foreground/40 text-foreground w-full border-none bg-transparent text-3xl font-bold outline-none focus:outline-none"
         />
       </div>
 

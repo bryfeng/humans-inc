@@ -3,33 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import {
-  BioEditor,
-  TextEditor,
-  LinksEditor,
-  ContentListEditor,
-} from '@/features/blocks/components';
-import { updateBlock } from '@/features/blocks/actions';
-import type {
-  BlockType,
-  BioBlockContent,
-  TextBlockContent,
-  LinksBlockContent,
-  ContentListBlockContent,
-} from '@/features/blocks/types';
-
-interface Block {
-  id: string;
-  user_id: string;
-  position: number;
-  block_type: string;
-  title?: string;
-  content: Record<string, unknown>;
-  config: Record<string, unknown>;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { BlockEditor } from '@/features/blocks/components';
+import type { Block } from '@/features/blocks/types';
 
 export default function EditBlockPage({
   params,
@@ -42,9 +17,8 @@ export default function EditBlockPage({
 
   const [block, setBlock] = useState<Block | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [blockId, setBlockId] = useState<string | null>(null);
 
   // Resolve the async params
@@ -90,91 +64,17 @@ export default function EditBlockPage({
     loadBlock();
   }, [blockId, router]);
 
-  const handleContentChange = (newContent: Record<string, unknown>) => {
-    if (!block) return;
-
-    setBlock({
-      ...block,
-      content: newContent,
-    });
-    setHasUnsavedChanges(true);
+  const handleSave = () => {
+    setIsEditing(false);
+    // The BlockEditor handles the actual saving
   };
 
-  const handleSave = async () => {
-    if (!block) return;
-
-    setSaving(true);
-    try {
-      await updateBlock({
-        id: block.id,
-        content: block.content,
-      });
-      setHasUnsavedChanges(false);
-    } catch (error) {
-      console.error('Failed to save block:', error);
-      setError('Failed to save block. Please try again.');
-    } finally {
-      setSaving(false);
-    }
+  const handleCancel = () => {
+    setIsEditing(false);
   };
 
-  const handlePublish = async () => {
-    if (!block) return;
-
-    setSaving(true);
-    try {
-      await updateBlock({
-        id: block.id,
-        content: block.content,
-        is_published: true,
-      });
-      setHasUnsavedChanges(false);
-      router.push('/dashboard?published=true');
-    } catch (error) {
-      console.error('Failed to publish block:', error);
-      setError('Failed to publish block. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const renderEditor = () => {
-    if (!block) return null;
-
-    const blockType = block.block_type as BlockType;
-
-    switch (blockType) {
-      case 'bio':
-        return (
-          <BioEditor
-            content={block.content as BioBlockContent}
-            onChange={handleContentChange}
-          />
-        );
-      case 'text':
-        return (
-          <TextEditor
-            content={block.content as TextBlockContent}
-            onChange={handleContentChange}
-          />
-        );
-      case 'links':
-        return (
-          <LinksEditor
-            content={block.content as LinksBlockContent}
-            onChange={handleContentChange}
-          />
-        );
-      case 'content_list':
-        return (
-          <ContentListEditor
-            content={block.content as ContentListBlockContent}
-            onChange={handleContentChange}
-          />
-        );
-      default:
-        return <div>Unsupported block type: {blockType}</div>;
-    }
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
   };
 
   if (loading) {
@@ -230,11 +130,6 @@ export default function EditBlockPage({
                     .replace(/\b\w/g, (l) => l.toUpperCase())}{' '}
                   Block
                 </h1>
-                {hasUnsavedChanges && (
-                  <p className="text-sm text-amber-600">
-                    You have unsaved changes
-                  </p>
-                )}
               </div>
             </div>
 
@@ -249,22 +144,6 @@ export default function EditBlockPage({
                   Exit Focus Mode
                 </button>
               )}
-
-              <button
-                onClick={handleSave}
-                disabled={saving || !hasUnsavedChanges}
-                className="bg-foreground/10 text-foreground hover:bg-foreground/20 rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Draft'}
-              </button>
-
-              <button
-                onClick={handlePublish}
-                disabled={saving}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? 'Publishing...' : 'Publish'}
-              </button>
             </div>
           </div>
         </div>
@@ -272,7 +151,15 @@ export default function EditBlockPage({
 
       {/* Editor Content */}
       <div className={`p-6 ${focusMode ? 'mx-auto max-w-4xl' : ''}`}>
-        <div className="space-y-6">{renderEditor()}</div>
+        <div className="space-y-6">
+          {block && (
+            <BlockEditor
+              block={block}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
