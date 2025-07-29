@@ -14,8 +14,17 @@ interface Block {
   content: Record<string, unknown>;
   config: Record<string, unknown>;
   is_published: boolean;
+  is_visible?: boolean;
+  display_order?: number;
   created_at: string;
   updated_at: string;
+}
+
+// Layout update interface
+interface BlockLayoutUpdate {
+  id: string;
+  is_visible: boolean;
+  display_order: number;
 }
 
 interface PagePreviewSectionProps {
@@ -24,6 +33,10 @@ interface PagePreviewSectionProps {
   publishedBlocks: Block[];
   draftBlocks: Block[];
   loading: boolean;
+  onSaveLayout?: (
+    userId: string,
+    layoutUpdates: BlockLayoutUpdate[]
+  ) => Promise<void>;
 }
 
 export function PagePreviewSection({
@@ -32,12 +45,34 @@ export function PagePreviewSection({
   publishedBlocks,
   draftBlocks,
   loading,
+  onSaveLayout,
 }: PagePreviewSectionProps) {
   const [showDrafts, setShowDrafts] = useState(false);
   const [hiddenBlocks, setHiddenBlocks] = useState<Set<string>>(new Set());
   const [blockOrder, setBlockOrder] = useState<string[]>(() =>
     [...publishedBlocks]
       .sort((a, b) => a.position - b.position)
+      .map((block) => block.id)
+  );
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [isSavingLayout, setIsSavingLayout] = useState(false);
+
+  // Track original state to detect changes
+  const [originalHiddenBlocks] = useState<Set<string>>(() => {
+    const hidden = new Set<string>();
+    publishedBlocks.forEach((block) => {
+      if (block.is_visible === false) {
+        hidden.add(block.id);
+      }
+    });
+    return hidden;
+  });
+  const [originalBlockOrder] = useState<string[]>(() =>
+    [...publishedBlocks]
+      .sort(
+        (a, b) =>
+          (a.display_order ?? a.position) - (b.display_order ?? b.position)
+      )
       .map((block) => block.id)
   );
 
@@ -58,6 +93,18 @@ export function PagePreviewSection({
       .map((block) => block.id);
     setBlockOrder(newOrder);
   }, [publishedBlocks]);
+
+  // Detect pending changes
+  React.useEffect(() => {
+    const hasOrderChanged =
+      JSON.stringify(blockOrder) !== JSON.stringify(originalBlockOrder);
+    const hasVisibilityChanged =
+      hiddenBlocks.size !== originalHiddenBlocks.size ||
+      [...hiddenBlocks].some((id) => !originalHiddenBlocks.has(id)) ||
+      [...originalHiddenBlocks].some((id) => !hiddenBlocks.has(id));
+
+    setHasPendingChanges(hasOrderChanged || hasVisibilityChanged);
+  }, [blockOrder, hiddenBlocks, originalBlockOrder, originalHiddenBlocks]);
 
   const toggleBlockVisibility = (blockId: string) => {
     setHiddenBlocks((prev) => {
@@ -88,6 +135,33 @@ export function PagePreviewSection({
     }
   };
 
+  const saveLayout = async () => {
+    if (!profile?.id || !hasPendingChanges || !onSaveLayout) return;
+
+    setIsSavingLayout(true);
+    try {
+      // Prepare layout updates
+      const layoutUpdates: BlockLayoutUpdate[] = blockOrder.map(
+        (blockId, index) => ({
+          id: blockId,
+          is_visible: !hiddenBlocks.has(blockId),
+          display_order: index,
+        })
+      );
+
+      await onSaveLayout(profile.id, layoutUpdates);
+
+      // Reset pending changes state
+      setHasPendingChanges(false);
+      alert('Layout saved successfully!');
+    } catch (error) {
+      console.error('Failed to save layout:', error);
+      alert('Failed to save layout. Please try again.');
+    } finally {
+      setIsSavingLayout(false);
+    }
+  };
+
   const shareProfile = async () => {
     if (!profile?.username) return;
 
@@ -114,10 +188,39 @@ export function PagePreviewSection({
       {/* Block Management */}
       {publishedBlocks.length > 0 && (
         <div className="bg-background border-foreground/10 rounded-lg border p-6">
-          <h3 className="mb-4 text-lg font-semibold">Block Management</h3>
-          <p className="text-foreground/60 mb-4 text-sm">
-            Reorder and control visibility of your published blocks
-          </p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Block Management</h3>
+              <p className="text-foreground/60 text-sm">
+                Reorder and control visibility of your published blocks
+              </p>
+            </div>
+            {hasPendingChanges && (
+              <button
+                onClick={saveLayout}
+                disabled={isSavingLayout}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {isSavingLayout ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    Save Layout
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          {hasPendingChanges && (
+            <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-2 text-sm text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              You have unsaved layout changes. Click "Save Layout" to make them
+              live on your public profile.
+            </div>
+          )}
           <div className="space-y-3">
             {blockOrder.map((blockId, index) => {
               const block = publishedBlocks.find((b) => b.id === blockId);
@@ -242,19 +345,29 @@ export function PagePreviewSection({
                 </div>
               ) : displayBlocks.length > 0 ? (
                 <div className="space-y-2">
-                  {(showDrafts
-                    ? displayBlocks
-                    : blockOrder
-                        .map((id) =>
-                          publishedBlocks.find((block) => block.id === id)
-                        )
-                        .filter(
-                          (block): block is Block =>
-                            block !== undefined && !hiddenBlocks.has(block.id)
-                        )
-                  )
-                    .slice(0, 3)
-                    .map((block) => (
+                  {(() => {
+                    // Get the blocks to display based on draft mode
+                    const blocksToShow = showDrafts
+                      ? displayBlocks
+                      : publishedBlocks;
+
+                    // Apply hidden blocks filter to all blocks
+                    const visibleBlocks = blocksToShow.filter(
+                      (block) => !hiddenBlocks.has(block.id)
+                    );
+
+                    // Sort by block order if not in draft mode
+                    const orderedBlocks = showDrafts
+                      ? visibleBlocks
+                      : blockOrder
+                          .map((id) =>
+                            visibleBlocks.find((block) => block.id === id)
+                          )
+                          .filter(
+                            (block): block is Block => block !== undefined
+                          );
+
+                    return orderedBlocks.slice(0, 3).map((block) => (
                       <div
                         key={block.id}
                         className="bg-foreground/5 relative rounded p-2"
@@ -275,16 +388,23 @@ export function PagePreviewSection({
                           {block.title || 'Content preview...'}
                         </div>
                       </div>
-                    ))}
+                    ));
+                  })()}
                   {(() => {
-                    const visibleCount = showDrafts
-                      ? displayBlocks.length
-                      : blockOrder.filter((id) => !hiddenBlocks.has(id)).length;
+                    // Calculate visible blocks count consistently with the display logic above
+                    const blocksToShow = showDrafts
+                      ? displayBlocks
+                      : publishedBlocks;
+                    const visibleBlocks = blocksToShow.filter(
+                      (block) => !hiddenBlocks.has(block.id)
+                    );
+                    const visibleCount = visibleBlocks.length;
+
                     return (
                       visibleCount > 3 && (
                         <div className="text-foreground/40 py-2 text-center text-xs">
                           +{visibleCount - 3} more blocks
-                          {!showDrafts && hiddenBlocks.size > 0 && (
+                          {hiddenBlocks.size > 0 && (
                             <span className="text-foreground/30 ml-1">
                               ({hiddenBlocks.size} hidden)
                             </span>

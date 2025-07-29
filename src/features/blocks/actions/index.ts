@@ -3,7 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { CreateBlockData, UpdateBlockData, Block } from '../types';
+import type {
+  CreateBlockData,
+  UpdateBlockData,
+  Block,
+  BlockLayoutUpdate,
+} from '../types';
 
 export async function createBlock(data: CreateBlockData) {
   const supabase = await createClient();
@@ -293,7 +298,9 @@ export async function getPublicUserBlocks(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .eq('is_published', true)
-    .order('position', { ascending: true });
+    .eq('is_visible', true) // Only show visible blocks
+    .order('display_order', { ascending: true, nullsFirst: false })
+    .order('position', { ascending: true }); // Fallback to position for blocks without display_order
 
   if (error) {
     console.error('Fetch public blocks error:', error.message);
@@ -678,4 +685,78 @@ export async function autoSaveBlock(
   }
 
   // Don't revalidate for auto-save to avoid excessive re-renders
+}
+
+// Update block layout (visibility and ordering)
+export async function updateBlockLayout(
+  userId: string,
+  layoutUpdates: BlockLayoutUpdate[]
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  if (userId !== user.id) {
+    throw new Error('Unauthorized: Cannot update layout for another user');
+  }
+
+  // Verify all blocks belong to the user before updating
+  const blockIds = layoutUpdates.map((update) => update.id);
+  const { data: userBlocks, error: verifyError } = await supabase
+    .from('blocks')
+    .select('id, user_id')
+    .in('id', blockIds)
+    .eq('user_id', userId);
+
+  if (verifyError) {
+    console.error('Verify blocks error:', verifyError.message);
+    throw new Error(`Failed to verify block ownership: ${verifyError.message}`);
+  }
+
+  if (userBlocks.length !== blockIds.length) {
+    throw new Error('Some blocks do not exist or do not belong to user');
+  }
+
+  // Update all blocks in batch
+  const updatePromises = layoutUpdates.map(
+    ({ id, is_visible, display_order }) =>
+      supabase
+        .from('blocks')
+        .update({
+          is_visible,
+          display_order,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('user_id', userId) // Double-check ownership
+  );
+
+  const results = await Promise.all(updatePromises);
+
+  // Check if any updates failed
+  const errors = results.filter((result) => result.error);
+  if (errors.length > 0) {
+    console.error('Update layout errors:', errors);
+    throw new Error('Failed to update some block layouts');
+  }
+
+  // Revalidate both dashboard and public profile
+  revalidatePath('/dashboard');
+
+  // Also revalidate the public profile page if we can determine the username
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.username) {
+    revalidatePath(`/${profile.username}`);
+  }
 }

@@ -44,6 +44,7 @@ import type {
   ContentListBlockContent,
 } from '@/features/blocks/types';
 import type { UserProfile } from '@/types/user';
+import { updateBlockLayout } from '@/features/blocks/actions';
 
 // Define local Block type to avoid boundary violation
 interface Block {
@@ -247,7 +248,8 @@ export default function DashboardPage() {
             blocks={blocks}
             publishedBlocks={publishedBlocks}
             draftBlocks={draftBlocks}
-            loading={draftsLoading}
+            loading={loading}
+            onSaveLayout={updateBlockLayout}
           />
         );
       case 'inbox':
@@ -281,6 +283,7 @@ export default function DashboardPage() {
             publishedBlocks={publishedBlocks}
             draftBlocks={draftBlocks}
             loading={draftsLoading}
+            onSaveLayout={updateBlockLayout}
           />
         );
     }

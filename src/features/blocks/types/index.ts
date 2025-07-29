@@ -8,6 +8,8 @@ export interface Block {
   content: Record<string, unknown>;
   config: Record<string, unknown>;
   is_published: boolean;
+  is_visible?: boolean; // Controls visibility on public page (default: true)
+  display_order?: number; // Custom ordering for public display (separate from position)
   created_at: string;
   updated_at: string;
 }
@@ -94,4 +96,13 @@ export interface UpdateBlockData {
   config?: BlockConfig;
   position?: number;
   is_published?: boolean;
+  is_visible?: boolean;
+  display_order?: number;
+}
+
+// For batch layout updates
+export interface BlockLayoutUpdate {
+  id: string;
+  is_visible: boolean;
+  display_order: number;
 }
