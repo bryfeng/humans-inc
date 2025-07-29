@@ -464,6 +464,7 @@ export default function DashboardPage() {
             onMoveToCollection={handleMoveToCollection}
             onDeleteBlock={handleDeleteBlock}
             onPublishBlock={handlePublishBlock}
+            onSwitchToCreate={() => setActiveSection('create')}
           />
         );
       case 'collections':

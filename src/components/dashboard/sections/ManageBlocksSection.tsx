@@ -34,6 +34,7 @@ interface ManageBlocksSectionProps {
   ) => Promise<void>;
   onDeleteBlock: (blockId: string) => Promise<void>;
   onPublishBlock: (blockId: string) => Promise<void>;
+  onSwitchToCreate?: () => void;
 }
 
 export function ManageBlocksSection({
@@ -44,6 +45,7 @@ export function ManageBlocksSection({
   onMoveToCollection,
   onDeleteBlock,
   onPublishBlock,
+  onSwitchToCreate,
 }: ManageBlocksSectionProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [filterType, setFilterType] = useState<string>('all');
@@ -275,16 +277,13 @@ export function ManageBlocksSection({
           {!searchQuery &&
             filterType === 'all' &&
             filterCollection === 'all' && (
-              <Link
-                href="/dashboard"
-                onClick={() => {
-                  /* This would switch to create section */
-                }}
+              <button
+                onClick={onSwitchToCreate}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors"
               >
                 <span>✏️</span>
                 Create Block
-              </Link>
+              </button>
             )}
         </div>
       ) : (
