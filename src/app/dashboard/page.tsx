@@ -58,6 +58,16 @@ import {
   moveBlockToCollection,
   getBlocksByCollection,
 } from '@/features/collections/actions';
+import {
+  OnboardingProvider,
+  WelcomeModal,
+  OnboardingProgress,
+  DashboardTour,
+} from '@/features/onboarding/components';
+import {
+  markTourAsSeen,
+  markBioAsCreated,
+} from '@/features/onboarding/actions/onboarding-actions';
 
 // Define local Block type to avoid boundary violation
 interface Block {
@@ -116,8 +126,13 @@ function CreateSectionComponent({
     }
   };
 
-  const handleBioCreationSuccess = () => {
+  const handleBioCreationSuccess = async () => {
     onDataRefresh();
+
+    // Mark bio as created in onboarding
+    if (userId) {
+      await markBioAsCreated(userId);
+    }
   };
 
   if (!profile || !profile.username) {
@@ -193,7 +208,32 @@ export default function DashboardPage() {
   const [publishedBlocks, setPublishedBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [draftsLoading, setDraftsLoading] = useState(true);
+
+  // Onboarding state
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showDashboardTour, setShowDashboardTour] = useState(false);
+
   const router = useRouter();
+
+  // Onboarding handlers
+  const handleStartWelcome = () => setShowWelcomeModal(true);
+  const handleStartBioCreation = () => {
+    setShowWelcomeModal(false);
+    // Check if bio already exists, if not trigger bio creation
+    const existingBio = [...draftBlocks, ...publishedBlocks].find(
+      (b) => b.block_type === 'bio'
+    );
+    if (!existingBio) {
+      console.log('Should trigger bio creation');
+    }
+  };
+  const handleStartTour = () => setShowDashboardTour(true);
+  const handleTourComplete = async () => {
+    setShowDashboardTour(false);
+    if (user) {
+      await markTourAsSeen(user.id);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -243,6 +283,13 @@ export default function DashboardPage() {
         ]);
         setDraftBlocks(drafts);
         setPublishedBlocks(published);
+
+        // Check if we should show onboarding for new users
+        const totalBlocks = [...drafts, ...published];
+        if (totalBlocks.length === 0) {
+          // New user - show welcome modal
+          setTimeout(() => setShowWelcomeModal(true), 1000);
+        }
       } catch (error) {
         console.error('Error loading draft/published blocks:', error);
       } finally {
@@ -521,28 +568,53 @@ export default function DashboardPage() {
     }
   };
 
+  if (!user) return null;
+
   return (
-    <div className="from-background via-background to-foreground/5 min-h-screen bg-gradient-to-br">
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <DashboardSidebar
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
+    <OnboardingProvider userId={user.id}>
+      <div className="from-background via-background to-foreground/5 min-h-screen bg-gradient-to-br">
+        <div className="flex h-screen">
+          {/* Sidebar */}
+          <DashboardSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+          />
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-6 lg:p-8">
-            {/* Profile Header - Always visible at top */}
-            <div className="mb-8">
-              <ProfileHeader profile={profile} blockCount={blocks.length} />
+          {/* Main Content */}
+          <div className="flex-1 overflow-auto">
+            <div className="p-6 lg:p-8">
+              {/* Onboarding Progress */}
+              <OnboardingProgress
+                onStartWelcome={handleStartWelcome}
+                onStartBioCreation={handleStartBioCreation}
+                onStartTour={handleStartTour}
+              />
+
+              {/* Profile Header - Always visible at top */}
+              <div className="mb-8">
+                <ProfileHeader profile={profile} blockCount={blocks.length} />
+              </div>
+
+              {/* Section Content */}
+              <div className="max-w-6xl">{renderActiveSection()}</div>
             </div>
-
-            {/* Section Content */}
-            <div className="max-w-6xl">{renderActiveSection()}</div>
           </div>
         </div>
+
+        {/* Onboarding Modals */}
+        <WelcomeModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          onStartBioCreation={handleStartBioCreation}
+          userId={user.id}
+        />
+
+        <DashboardTour
+          isActive={showDashboardTour}
+          onComplete={handleTourComplete}
+          onSkip={handleTourComplete}
+        />
       </div>
-    </div>
+    </OnboardingProvider>
   );
 }
