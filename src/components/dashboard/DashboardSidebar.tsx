@@ -6,8 +6,7 @@ export type DashboardSection =
   | 'preview'
   | 'manage'
   | 'collections'
-  | 'create'
-  | 'drafts'
+  | 'write'
   | 'inbox';
 
 interface DashboardSidebarProps {
@@ -32,26 +31,20 @@ const sidebarItems: SidebarItem[] = [
   {
     id: 'manage',
     label: 'Manage Blocks',
-    icon: '�',
+    icon: '📊',
     description: 'Organize and manage your content blocks',
   },
   {
     id: 'collections',
     label: 'Collections',
-    icon: '�️',
+    icon: '📁',
     description: 'Group your content into collections',
   },
   {
-    id: 'create',
-    label: 'Create',
-    icon: '✨',
-    description: 'Add new content blocks',
-  },
-  {
-    id: 'drafts',
-    label: 'Drafts',
-    icon: '📝',
-    description: 'Unpublished content',
+    id: 'write',
+    label: 'Write',
+    icon: '✍️',
+    description: 'Create and manage your content',
   },
   {
     id: 'inbox',

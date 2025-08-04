@@ -14,6 +14,7 @@ import {
   ManageBlocksSection,
   CollectionsSection,
 } from '@/components/dashboard/sections';
+import { WriteSection } from './WriteSection';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import {
   getDraftBlocks,
@@ -443,50 +444,18 @@ export default function DashboardPage() {
         );
       case 'inbox':
         return <InboxSection />;
-      case 'drafts':
+      case 'write':
         return (
-          <DraftsSection
+          <WriteSection
+            userId={user?.id || ''}
+            profile={profile}
             blocks={blocks}
             draftBlocks={draftBlocks}
+            publishedBlocks={publishedBlocks}
             publishedCount={publishedBlocks.length}
             loading={draftsLoading}
             onPublish={handlePublish}
             onDelete={handleDelete}
-          />
-        );
-      case 'manage':
-        return (
-          <ManageBlocksSection
-            profile={profile}
-            blocks={blocks}
-            collections={collections}
-            loading={loading}
-            onMoveToCollection={handleMoveToCollection}
-            onDeleteBlock={handleDeleteBlock}
-            onPublishBlock={handlePublishBlock}
-            onSwitchToCreate={() => setActiveSection('create')}
-          />
-        );
-      case 'collections':
-        return (
-          <CollectionsSection
-            profile={profile}
-            collections={collections}
-            blocks={blocks}
-            loading={loading}
-            onCreateCollection={handleCreateCollection}
-            onUpdateCollection={handleUpdateCollection}
-            onDeleteCollection={handleDeleteCollection}
-          />
-        );
-      case 'create':
-        return (
-          <CreateSectionComponent
-            userId={user?.id || ''}
-            profile={profile}
-            currentBlockCount={blocks.length}
-            draftBlocks={draftBlocks}
-            publishedBlocks={publishedBlocks}
             onDataRefresh={async () => {
               if (user) {
                 try {
@@ -511,6 +480,31 @@ export default function DashboardPage() {
                 }
               }
             }}
+          />
+        );
+      case 'manage':
+        return (
+          <ManageBlocksSection
+            profile={profile}
+            blocks={blocks}
+            collections={collections}
+            loading={loading}
+            onMoveToCollection={handleMoveToCollection}
+            onDeleteBlock={handleDeleteBlock}
+            onPublishBlock={handlePublishBlock}
+            onSwitchToCreate={() => setActiveSection('write')}
+          />
+        );
+      case 'collections':
+        return (
+          <CollectionsSection
+            profile={profile}
+            collections={collections}
+            blocks={blocks}
+            loading={loading}
+            onCreateCollection={handleCreateCollection}
+            onUpdateCollection={handleUpdateCollection}
+            onDeleteCollection={handleDeleteCollection}
           />
         );
       default:
