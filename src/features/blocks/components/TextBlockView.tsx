@@ -139,13 +139,15 @@ export function TextBlockView({
         </>
       )}
 
-      {/* Reading Stats for Rich Content */}
-      {formatting === 'rich' && (wordCount || readingTime) && (
-        <div className="text-foreground/60 border-border flex items-center gap-4 border-b pb-3 text-sm">
-          {wordCount && <span>{wordCount} words</span>}
-          {readingTime && <span>{readingTime} min read</span>}
-        </div>
-      )}
+      {/* Reading Stats - Only show in full mode (individual block pages) */}
+      {mode === 'full' &&
+        formatting === 'rich' &&
+        (wordCount || readingTime) && (
+          <div className="text-foreground/60 border-border flex items-center gap-4 border-b pb-3 text-sm">
+            {wordCount && <span>{wordCount} words</span>}
+            {readingTime && <span>{readingTime} min read</span>}
+          </div>
+        )}
 
       {/* Content Rendering */}
       <div className="prose prose-lg prose-foreground max-w-none">
