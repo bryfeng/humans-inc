@@ -128,11 +128,11 @@ function CreateSectionComponent({
 
   const handleBioCreationSuccess = async () => {
     onDataRefresh();
+  };
 
+  const handleBioCreated = async (userId: string) => {
     // Mark bio as created in onboarding
-    if (userId) {
-      await markBioAsCreated(userId);
-    }
+    await markBioAsCreated(userId);
   };
 
   if (!profile || !profile.username) {
@@ -192,6 +192,7 @@ function CreateSectionComponent({
         isOpen={showBioCreator}
         onClose={() => setShowBioCreator(false)}
         onSuccess={handleBioCreationSuccess}
+        onBioCreated={handleBioCreated}
       />
     </div>
   );
@@ -219,13 +220,8 @@ export default function DashboardPage() {
   const handleStartWelcome = () => setShowWelcomeModal(true);
   const handleStartBioCreation = () => {
     setShowWelcomeModal(false);
-    // Check if bio already exists, if not trigger bio creation
-    const existingBio = [...draftBlocks, ...publishedBlocks].find(
-      (b) => b.block_type === 'bio'
-    );
-    if (!existingBio) {
-      console.log('Should trigger bio creation');
-    }
+    // Switch to write section to enable bio creation overlay
+    setActiveSection('write');
   };
   const handleStartTour = () => setShowDashboardTour(true);
   const handleTourComplete = async () => {
@@ -287,8 +283,41 @@ export default function DashboardPage() {
         // Check if we should show onboarding for new users
         const totalBlocks = [...drafts, ...published];
         if (totalBlocks.length === 0) {
-          // New user - show welcome modal
-          setTimeout(() => setShowWelcomeModal(true), 1000);
+          // Only show welcome modal if user hasn't seen it yet
+          // We need to check onboarding state first
+          setTimeout(async () => {
+            try {
+              const { data: profileData, error } = await supabase
+                .from('profiles')
+                .select('onboarding_state')
+                .eq('id', authUser.id)
+                .single();
+
+              console.log('Onboarding check:', {
+                profileData,
+                error,
+                totalBlocksCount: totalBlocks.length,
+                onboardingState: profileData?.onboarding_state,
+                hasSeenWelcome: profileData?.onboarding_state?.has_seen_welcome,
+              });
+
+              // Show modal only if onboarding_state doesn't exist OR has_seen_welcome is false
+              const onboardingState = profileData?.onboarding_state;
+              const hasSeenWelcome = onboardingState?.has_seen_welcome === true;
+
+              if (!hasSeenWelcome) {
+                console.log(
+                  'Showing welcome modal because has_seen_welcome is not true'
+                );
+                setShowWelcomeModal(true);
+              } else {
+                console.log('Not showing welcome modal - already seen');
+              }
+            } catch (err) {
+              console.log('Onboarding check error, showing modal:', err);
+              setShowWelcomeModal(true);
+            }
+          }, 1000);
         }
       } catch (error) {
         console.error('Error loading draft/published blocks:', error);

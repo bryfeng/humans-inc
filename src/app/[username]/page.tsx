@@ -20,15 +20,22 @@ export async function generateStaticParams() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: profiles } = await supabase.from('profiles').select('username');
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('username')
+    .not('username', 'is', null);
 
   if (!profiles) {
     return [];
   }
 
-  return profiles.map((profile) => ({
-    username: profile.username,
-  }));
+  return profiles
+    .filter(
+      (profile) => profile.username && typeof profile.username === 'string'
+    )
+    .map((profile) => ({
+      username: profile.username as string,
+    }));
 }
 
 // Generate metadata for SEO

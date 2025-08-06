@@ -13,7 +13,7 @@ export async function getOnboardingState(
     .from('profiles')
     .select('onboarding_state')
     .eq('id', userId)
-    .single();
+    .maybeSingle(); // Use maybeSingle() to handle 0 or 1 rows
 
   if (error) {
     console.error('Error fetching onboarding state:', error);
@@ -32,11 +32,22 @@ export async function updateOnboardingState(
   // First get current state
   const currentState = await getOnboardingState(userId);
 
-  // Merge with updates
-  const newState = { ...currentState, ...updates };
+  // Create default state if none exists
+  const defaultState = {
+    has_seen_welcome: false,
+    has_created_bio: false,
+    has_seen_dashboard_tour: false,
+    has_published_first_block: false,
+    completion_percentage: 0,
+    last_step_completed: null,
+    tour_dismissed: false,
+  };
+
+  // Merge with current state and updates
+  const newState = { ...defaultState, ...currentState, ...updates };
 
   // Calculate completion percentage
-  const totalSteps = 5; // welcome, bio, tour, publish, completed
+  const totalSteps = 4; // welcome, bio, tour, publish
   const completedSteps = [
     newState.has_seen_welcome,
     newState.has_created_bio,
@@ -48,15 +59,19 @@ export async function updateOnboardingState(
     (completedSteps / totalSteps) * 100
   );
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({
+  // Use upsert to handle cases where profile doesn't exist yet
+  const { error } = await supabase.from('profiles').upsert(
+    {
+      id: userId,
       onboarding_state: newState,
       ...(newState.completion_percentage === 100
         ? { onboarding_completed_at: new Date().toISOString() }
         : {}),
-    })
-    .eq('id', userId);
+    },
+    {
+      onConflict: 'id',
+    }
+  );
 
   if (error) {
     console.error('Error updating onboarding state:', error);

@@ -33,11 +33,27 @@ function SubmitButton({
   );
 }
 
-export function ProfileForm({ profile }: { profile: UserProfile | null }) {
+export function ProfileForm({
+  profile,
+  onSuccess,
+}: {
+  profile: UserProfile | null;
+  onSuccess?: () => void;
+}) {
   const [state, formAction] = useActionState(updateProfile, initialState);
   const [username, setUsername] = useState(profile?.username ?? '');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle successful update - collapse form after showing success message
+  useEffect(() => {
+    if (state?.success && onSuccess) {
+      const timer = setTimeout(() => {
+        onSuccess();
+      }, 2000); // Wait 2 seconds to show success message
+      return () => clearTimeout(timer);
+    }
+  }, [state?.success, onSuccess]);
 
   useEffect(() => {
     if (username === profile?.username || username.length < 3) {

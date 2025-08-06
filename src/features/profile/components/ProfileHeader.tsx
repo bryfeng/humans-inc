@@ -14,6 +14,10 @@ export function ProfileHeader({ profile, blockCount }: ProfileHeaderProps) {
 
   const completionPercentage = calculateProfileCompletion(profile);
 
+  const handleProfileUpdateSuccess = () => {
+    setIsEditing(false);
+  };
+
   return (
     <div className="bg-background border-foreground/10 rounded-lg border p-6">
       <div className="flex items-start justify-between">
@@ -76,7 +80,10 @@ export function ProfileHeader({ profile, blockCount }: ProfileHeaderProps) {
       {isEditing && (
         <div className="animate-fade-in-up border-foreground/10 mt-6 overflow-hidden border-t pt-6">
           <div className="animate-scale-in">
-            <ProfileForm profile={profile} />
+            <ProfileForm
+              profile={profile}
+              onSuccess={handleProfileUpdateSuccess}
+            />
           </div>
         </div>
       )}

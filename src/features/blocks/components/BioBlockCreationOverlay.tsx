@@ -10,12 +10,14 @@ interface BioBlockCreationOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onBioCreated?: (userId: string) => void;
 }
 
 export function BioBlockCreationOverlay({
   isOpen,
   onClose,
   onSuccess,
+  onBioCreated,
 }: BioBlockCreationOverlayProps) {
   const [title, setTitle] = useState('About Me');
   const [content, setContent] = useState<BioBlockContent>({
@@ -35,6 +37,18 @@ export function BioBlockCreationOverlay({
     } = await supabase.auth.getUser();
 
     if (!user) {
+      return;
+    }
+
+    // Check if user has profile set up
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.username) {
+      setError('Please set up your username first in your profile settings.');
       return;
     }
 
@@ -60,6 +74,11 @@ export function BioBlockCreationOverlay({
       };
 
       await createBlockWithSlug(blockData);
+
+      // Notify onboarding if callback provided
+      if (onBioCreated) {
+        onBioCreated(user.id);
+      }
 
       // Reset form
       setTitle('About Me');
