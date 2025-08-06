@@ -63,10 +63,12 @@ import {
   WelcomeModal,
   OnboardingProgress,
   DashboardTour,
+  useOnboarding,
 } from '@/features/onboarding/components';
 import {
   markTourAsSeen,
   markBioAsCreated,
+  markFirstBlockPublished,
 } from '@/features/onboarding/actions/onboarding-actions';
 
 // Define local Block type to avoid boundary violation
@@ -213,6 +215,7 @@ export default function DashboardPage() {
   // Onboarding state
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showDashboardTour, setShowDashboardTour] = useState(false);
+  const [showBioCreationOverlay, setShowBioCreationOverlay] = useState(false);
 
   const router = useRouter();
 
@@ -220,8 +223,21 @@ export default function DashboardPage() {
   const handleStartWelcome = () => setShowWelcomeModal(true);
   const handleStartBioCreation = () => {
     setShowWelcomeModal(false);
-    // Switch to write section to enable bio creation overlay
+    // Directly show bio creation overlay
+    setShowBioCreationOverlay(true);
+    // Also switch to write section
     setActiveSection('write');
+  };
+
+  const handleBioCreationSuccess = async () => {
+    setShowBioCreationOverlay(false);
+    // Force a full page reload to refresh all state including onboarding
+    window.location.reload();
+  };
+
+  const handleBioCreatedFromOnboarding = async (userId: string) => {
+    // Mark bio as created in onboarding
+    await markBioAsCreated(userId);
   };
   const handleStartTour = () => setShowDashboardTour(true);
   const handleTourComplete = async () => {
@@ -333,6 +349,9 @@ export default function DashboardPage() {
     if (!user) return;
 
     await publishBlock(blockId);
+
+    // Mark first block as published for onboarding
+    await markFirstBlockPublished(user.id);
 
     // Refresh data
     const [drafts, published] = await Promise.all([
@@ -471,6 +490,11 @@ export default function DashboardPage() {
   const handlePublishBlock = async (blockId: string) => {
     try {
       await publishBlock(blockId);
+
+      // Mark first block as published for onboarding
+      if (user) {
+        await markFirstBlockPublished(user.id);
+      }
 
       // Refresh blocks and drafts
       if (user) {
@@ -642,6 +666,14 @@ export default function DashboardPage() {
           isActive={showDashboardTour}
           onComplete={handleTourComplete}
           onSkip={handleTourComplete}
+        />
+
+        {/* Global Bio Creation Overlay - can be triggered from onboarding */}
+        <BioBlockCreationOverlay
+          isOpen={showBioCreationOverlay}
+          onClose={() => setShowBioCreationOverlay(false)}
+          onSuccess={handleBioCreationSuccess}
+          onBioCreated={handleBioCreatedFromOnboarding}
         />
       </div>
     </OnboardingProvider>
