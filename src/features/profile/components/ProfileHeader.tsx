@@ -19,7 +19,10 @@ export function ProfileHeader({ profile, blockCount }: ProfileHeaderProps) {
   };
 
   return (
-    <div className="bg-background border-foreground/10 rounded-lg border p-6">
+    <div
+      className="bg-background border-foreground/10 rounded-lg border p-6"
+      data-tour="profile-header"
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-4 flex items-center gap-4">

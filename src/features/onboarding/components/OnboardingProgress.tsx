@@ -3,25 +3,48 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboarding } from './OnboardingProvider';
+import { markOnboardingAsCompleted } from '../actions/onboarding-actions';
 import type { OnboardingMilestone } from '../types';
 
 interface OnboardingProgressProps {
   onStartWelcome: () => void;
   onStartBioCreation: () => void;
-  onStartTour: () => void;
+  userId: string;
 }
 
 export function OnboardingProgress({
   onStartWelcome,
   onStartBioCreation,
-  onStartTour,
+  userId,
 }: OnboardingProgressProps) {
-  const { onboardingState, isLoading } = useOnboarding();
+  const { onboardingState, isLoading, refreshOnboardingState } =
+    useOnboarding();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  // Debug log to see what's happening
+  console.log('OnboardingProgress debug:', {
+    onboardingState,
+    has_published_first_block: onboardingState.has_published_first_block,
+    completion_percentage: onboardingState.completion_percentage,
+  });
 
   if (isLoading || onboardingState.completion_percentage === 100) {
     return null;
   }
+
+  const handleFinishOnboarding = async () => {
+    setIsCompleting(true);
+    try {
+      await markOnboardingAsCompleted(userId);
+      // Refresh the onboarding state to trigger UI updates
+      await refreshOnboardingState();
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
   const milestones: OnboardingMilestone[] = [
     {
@@ -34,24 +57,16 @@ export function OnboardingProgress({
     },
     {
       id: 'bio',
-      title: 'Create your bio',
-      description: 'Add your name, tagline, and introduction',
+      title: 'Set up profile & create bio',
+      description: 'Add your profile and create your first block',
       completed: onboardingState.has_created_bio,
       icon: '✍️',
       action: onStartBioCreation,
     },
     {
-      id: 'tour',
-      title: 'Explore dashboard',
-      description: 'Learn how to use your dashboard',
-      completed: onboardingState.has_seen_dashboard_tour,
-      icon: '🗺️',
-      action: onStartTour,
-    },
-    {
-      id: 'publish',
-      title: 'Publish first block',
-      description: 'Make your content visible to others',
+      id: 'finish',
+      title: "You're all set!",
+      description: 'Start exploring and creating content',
       completed: onboardingState.has_published_first_block,
       icon: '🚀',
     },
@@ -153,16 +168,27 @@ export function OnboardingProgress({
                     </p>
                   </div>
 
-                  {!milestone.completed &&
-                    milestone.action &&
-                    milestone === nextMilestone && (
-                      <button
-                        onClick={milestone.action}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1 text-sm transition-colors"
-                      >
-                        Start
-                      </button>
-                    )}
+                  {!milestone.completed && milestone === nextMilestone && (
+                    <>
+                      {milestone.action && (
+                        <button
+                          onClick={milestone.action}
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1 text-sm transition-colors"
+                        >
+                          Start
+                        </button>
+                      )}
+                      {milestone.id === 'finish' && (
+                        <button
+                          onClick={handleFinishOnboarding}
+                          disabled={isCompleting}
+                          className="rounded-lg bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                        >
+                          {isCompleting ? 'Finishing...' : 'Finish'}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               ))}
             </motion.div>

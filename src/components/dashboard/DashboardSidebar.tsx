@@ -59,7 +59,10 @@ export function DashboardSidebar({
   onSectionChange,
 }: DashboardSidebarProps) {
   return (
-    <div className="bg-background border-foreground/10 flex h-full w-72 flex-col border-r">
+    <div
+      className="bg-background border-foreground/10 flex h-full w-72 flex-col border-r"
+      data-tour="sidebar"
+    >
       {/* Sidebar Header */}
       <div className="border-foreground/10 border-b p-6">
         <div className="flex items-center gap-3">

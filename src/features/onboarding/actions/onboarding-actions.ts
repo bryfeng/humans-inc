@@ -46,6 +46,14 @@ export async function updateOnboardingState(
   // Merge with current state and updates
   const newState = { ...defaultState, ...currentState, ...updates };
 
+  console.log('updateOnboardingState:', {
+    userId,
+    currentState,
+    updates,
+    newState,
+    completion_percentage: newState.completion_percentage,
+  });
+
   // Calculate completion percentage
   const totalSteps = 4; // welcome, bio, tour, publish
   const completedSteps = [
@@ -104,16 +112,32 @@ export async function markTourAsSeen(userId: string) {
 }
 
 export async function markFirstBlockPublished(userId: string) {
-  return updateOnboardingState(userId, {
+  console.log('markFirstBlockPublished called for userId:', userId);
+  const result = await updateOnboardingState(userId, {
     has_published_first_block: true,
     last_step_completed: 'first_publish',
   });
+  console.log('markFirstBlockPublished result:', result);
+  return result;
 }
 
 export async function dismissTour(userId: string) {
   return updateOnboardingState(userId, {
     tour_dismissed: true,
   });
+}
+
+export async function markOnboardingAsCompleted(userId: string) {
+  console.log('markOnboardingAsCompleted called for userId:', userId);
+  const result = await updateOnboardingState(userId, {
+    has_seen_welcome: true,
+    has_created_bio: true,
+    has_seen_dashboard_tour: true,
+    has_published_first_block: true,
+    last_step_completed: 'onboarding_complete',
+  });
+  console.log('markOnboardingAsCompleted result:', result);
+  return result;
 }
 
 export async function resetOnboarding(userId: string) {

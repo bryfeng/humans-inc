@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 // Sample block views for demo - simplified to avoid boundary violations
 import { markWelcomeAsSeen } from '../actions/onboarding-actions';
 import { useOnboarding } from './OnboardingProvider';
@@ -87,29 +88,41 @@ export function WelcomeModal({
   const [currentStep, setCurrentStep] = useState(0);
   const { refreshOnboardingState } = useOnboarding();
 
+  // Profile setup form state
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [profileError, setProfileError] = useState('');
+
   const steps = [
     {
       title: 'Welcome to Your Digital Space',
       content:
         'Create a curated page that tells your story through organized content blocks.',
       showDemo: false,
+      isProfileStep: false,
     },
     {
-      title: 'What are Blocks?',
+      title: 'Set Up Your Profile',
       content:
-        'Blocks are modular pieces of content that you can combine to create your unique page.',
-      showDemo: true,
+        "First, let's set up your username and display name so you can start creating content.",
+      showDemo: false,
+      isProfileStep: true,
     },
     {
       title: 'Ready to Start?',
       content:
-        "Let's create your first block - a bio block that introduces you to visitors.",
-      showDemo: false,
+        "Great! Now let's create your first block - a bio block that introduces you to visitors.",
+      showDemo: true,
+      isProfileStep: false,
     },
   ];
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+  const handleNext = async () => {
+    if (steps[currentStep].isProfileStep) {
+      // Handle profile submission
+      await handleProfileSubmit();
+    } else if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       handleGetStarted();
@@ -119,6 +132,89 @@ export function WelcomeModal({
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleProfileSubmit = async () => {
+    if (!username.trim() || !displayName.trim()) {
+      setProfileError('Please fill in both username and display name.');
+      return;
+    }
+
+    setIsSubmittingProfile(true);
+    setProfileError('');
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setProfileError('Authentication required.');
+        return;
+      }
+
+      // Validate username format
+      const cleanUsername = username.trim().toLowerCase();
+      if (!/^[a-z0-9_]+$/.test(cleanUsername)) {
+        setProfileError(
+          'Username can only contain lowercase letters, numbers, and underscores.'
+        );
+        return;
+      }
+
+      if (cleanUsername.length < 3 || cleanUsername.length > 50) {
+        setProfileError('Username must be between 3 and 50 characters.');
+        return;
+      }
+
+      const reservedUsernames = [
+        'login',
+        'signup',
+        'api',
+        'admin',
+        'dashboard',
+        'profile',
+        'settings',
+        'legal',
+        'help',
+        'contact',
+      ];
+      if (reservedUsernames.includes(cleanUsername)) {
+        setProfileError('This username is reserved and cannot be used.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          username: cleanUsername,
+          display_name: displayName.trim(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        if (error.code === '23505') {
+          setProfileError('This username is already taken.');
+        } else {
+          setProfileError(`Database error: ${error.message}`);
+        }
+        return;
+      }
+
+      // Profile created successfully, move to next step
+      setCurrentStep(currentStep + 1);
+      // Force refresh the page to load the new profile data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Profile creation error:', error);
+      setProfileError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmittingProfile(false);
     }
   };
 
@@ -189,35 +285,56 @@ export function WelcomeModal({
                     {steps[currentStep].content}
                   </p>
 
-                  {currentStep === 1 && (
+                  {steps[currentStep].isProfileStep && (
                     <div className="space-y-4">
-                      <div className="bg-foreground/5 flex items-center gap-3 rounded-lg p-4">
-                        <span className="text-2xl">👋</span>
+                      <div className="space-y-3">
                         <div>
-                          <h3 className="font-semibold">Bio Block</h3>
-                          <p className="text-foreground/70 text-sm">
-                            Introduce yourself with name, tagline, and links
+                          <label
+                            htmlFor="username"
+                            className="mb-2 block text-sm font-medium"
+                          >
+                            Username
+                          </label>
+                          <input
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="your-username"
+                            className="border-foreground/20 bg-background focus:ring-primary w-full rounded-lg border px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
+                          />
+                          <p className="text-foreground/60 mt-1 text-xs">
+                            This will be your URL: {username || 'yourname'}
+                            .humans.inc
+                          </p>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="displayName"
+                            className="mb-2 block text-sm font-medium"
+                          >
+                            Display Name
+                          </label>
+                          <input
+                            id="displayName"
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            placeholder="Your Name"
+                            className="border-foreground/20 bg-background focus:ring-primary w-full rounded-lg border px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
+                          />
+                          <p className="text-foreground/60 mt-1 text-xs">
+                            This is how your name will appear to visitors
                           </p>
                         </div>
                       </div>
-                      <div className="bg-foreground/5 flex items-center gap-3 rounded-lg p-4">
-                        <span className="text-2xl">📝</span>
-                        <div>
-                          <h3 className="font-semibold">Text Block</h3>
-                          <p className="text-foreground/70 text-sm">
-                            Share your thoughts and written content
-                          </p>
+
+                      {profileError && (
+                        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                          {profileError}
                         </div>
-                      </div>
-                      <div className="bg-foreground/5 flex items-center gap-3 rounded-lg p-4">
-                        <span className="text-2xl">🔗</span>
-                        <div>
-                          <h3 className="font-semibold">Links Block</h3>
-                          <p className="text-foreground/70 text-sm">
-                            Curate important links and resources
-                          </p>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </motion.div>
@@ -244,9 +361,16 @@ export function WelcomeModal({
                 )}
                 <button
                   onClick={handleNext}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-2 transition-colors"
+                  disabled={isSubmittingProfile}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {currentStep === steps.length - 1 ? "Let's Create!" : 'Next'}
+                  {isSubmittingProfile
+                    ? 'Creating...'
+                    : steps[currentStep].isProfileStep
+                      ? 'Create Profile'
+                      : currentStep === steps.length - 1
+                        ? "Let's Create!"
+                        : 'Next'}
                 </button>
               </div>
             </div>
@@ -263,7 +387,7 @@ export function WelcomeModal({
                     <div className="h-3 w-3 rounded-full bg-yellow-400"></div>
                     <div className="h-3 w-3 rounded-full bg-green-400"></div>
                     <div className="text-foreground/60 ml-4 font-mono text-sm">
-                      yourname.humans.inc
+                      {username || 'yourname'}.humans.inc
                     </div>
                   </div>
                 </div>

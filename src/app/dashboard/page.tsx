@@ -62,11 +62,9 @@ import {
   OnboardingProvider,
   WelcomeModal,
   OnboardingProgress,
-  DashboardTour,
   useOnboarding,
 } from '@/features/onboarding/components';
 import {
-  markTourAsSeen,
   markBioAsCreated,
   markFirstBlockPublished,
 } from '@/features/onboarding/actions/onboarding-actions';
@@ -214,7 +212,6 @@ export default function DashboardPage() {
 
   // Onboarding state
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [showDashboardTour, setShowDashboardTour] = useState(false);
   const [showBioCreationOverlay, setShowBioCreationOverlay] = useState(false);
 
   const router = useRouter();
@@ -238,13 +235,6 @@ export default function DashboardPage() {
   const handleBioCreatedFromOnboarding = async (userId: string) => {
     // Mark bio as created in onboarding
     await markBioAsCreated(userId);
-  };
-  const handleStartTour = () => setShowDashboardTour(true);
-  const handleTourComplete = async () => {
-    setShowDashboardTour(false);
-    if (user) {
-      await markTourAsSeen(user.id);
-    }
   };
 
   useEffect(() => {
@@ -298,7 +288,10 @@ export default function DashboardPage() {
 
         // Check if we should show onboarding for new users
         const totalBlocks = [...drafts, ...published];
-        if (totalBlocks.length === 0) {
+        const hasProfile = profileResult.data && profileResult.data.username;
+
+        // Only show welcome modal if user has no blocks AND no profile setup
+        if (totalBlocks.length === 0 && !hasProfile) {
           // Only show welcome modal if user hasn't seen it yet
           // We need to check onboarding state first
           setTimeout(async () => {
@@ -313,6 +306,7 @@ export default function DashboardPage() {
                 profileData,
                 error,
                 totalBlocksCount: totalBlocks.length,
+                hasProfile,
                 onboardingState: profileData?.onboarding_state,
                 hasSeenWelcome: profileData?.onboarding_state?.has_seen_welcome,
               });
@@ -323,11 +317,13 @@ export default function DashboardPage() {
 
               if (!hasSeenWelcome) {
                 console.log(
-                  'Showing welcome modal because has_seen_welcome is not true'
+                  'Showing welcome modal because has_seen_welcome is not true and no profile setup'
                 );
                 setShowWelcomeModal(true);
               } else {
-                console.log('Not showing welcome modal - already seen');
+                console.log(
+                  'Not showing welcome modal - already seen or profile exists'
+                );
               }
             } catch (err) {
               console.log('Onboarding check error, showing modal:', err);
@@ -360,6 +356,11 @@ export default function DashboardPage() {
     ]);
     setDraftBlocks(drafts);
     setPublishedBlocks(published);
+
+    // Force refresh by reloading the page to update onboarding state
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const handleDelete = async (blockId: string) => {
@@ -640,7 +641,7 @@ export default function DashboardPage() {
               <OnboardingProgress
                 onStartWelcome={handleStartWelcome}
                 onStartBioCreation={handleStartBioCreation}
-                onStartTour={handleStartTour}
+                userId={user.id}
               />
 
               {/* Profile Header - Always visible at top */}
@@ -649,7 +650,21 @@ export default function DashboardPage() {
               </div>
 
               {/* Section Content */}
-              <div className="max-w-6xl">{renderActiveSection()}</div>
+              <div className="max-w-6xl">
+                <div
+                  data-tour={
+                    activeSection === 'write'
+                      ? 'create-section'
+                      : activeSection === 'preview'
+                        ? 'preview'
+                        : activeSection === 'manage'
+                          ? 'drafts'
+                          : undefined
+                  }
+                >
+                  {renderActiveSection()}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -660,12 +675,6 @@ export default function DashboardPage() {
           onClose={() => setShowWelcomeModal(false)}
           onStartBioCreation={handleStartBioCreation}
           userId={user.id}
-        />
-
-        <DashboardTour
-          isActive={showDashboardTour}
-          onComplete={handleTourComplete}
-          onSkip={handleTourComplete}
         />
 
         {/* Global Bio Creation Overlay - can be triggered from onboarding */}
