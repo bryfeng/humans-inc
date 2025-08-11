@@ -23,13 +23,13 @@ export default async function Home() {
   // Sample data for Bryan Feng's bio preview
   const sampleBioContent: BioBlockContent = {
     display_name: 'Bryan Feng',
-    tagline: 'Human, Alchemist',
-    bio: 'Passionate about creating meaningful digital experiences. Currently building tools that help people share their stories and connect with others.',
+    tagline: 'Humans.inc dev',
+    bio: 'I want to help you build your best personal landing page. Currently building tools that help people share their stories and connect with others.',
     avatar_url: undefined,
     links: [
       { label: 'GitHub', url: 'https://github.com/bryfeng' },
       { label: 'LinkedIn', url: 'https://linkedin.com/in/bryanfeng' },
-      { label: 'Email', url: 'mailto:bryan@example.com' },
+      { label: 'Email', url: 'mailto:humansdotinc@gmail.com' },
     ],
   };
 
@@ -53,7 +53,7 @@ export default async function Home() {
       },
       {
         title: 'Portfolio Website',
-        url: 'https://bryanfeng.com',
+        url: 'https://humans.inc/bryan',
         description: 'My complete portfolio and past work',
       },
     ],
@@ -69,8 +69,10 @@ export default async function Home() {
             <div className="space-y-8">
               <div className="animate-fade-in">
                 <h1 className="mb-8 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-                  Your story,
-                  <span className="text-primary block">beautifully told</span>
+                  Human centric
+                  <span className="text-primary block">
+                    Stories, Ideas, Experiments & Creations
+                  </span>
                 </h1>
                 <p className="text-accent/90 mb-8 text-lg leading-relaxed text-pretty sm:text-xl dark:text-white">
                   Create a curated digital space that reflects your voice,
